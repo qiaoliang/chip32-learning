@@ -1,3 +1,5 @@
+**/.gitignore
+*/**/~*.*
 **/.DS_*
-.pio
-.vscode
+**/.pio/
+**/.vscode/
