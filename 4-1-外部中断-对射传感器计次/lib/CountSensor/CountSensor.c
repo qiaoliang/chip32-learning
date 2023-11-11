@@ -29,7 +29,7 @@ void CountSensor_Init(void)
 	EXTI_InitStructure.EXTI_Line = EXTI_Line14;					//选择配置外部中断的14号线
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;					//指定外部中断线使能
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;			//指定外部中断线为中断模式
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;		//指定外部中断线为下降沿触发
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling|EXTI_Trigger_Rising;		//指定外部中断线为下降沿和上升沿都会触发
 	EXTI_Init(&EXTI_InitStructure);								//将结构体变量交给EXTI_Init，配置EXTI外设
 
 	/*NVIC中断分组*/
