@@ -66,7 +66,7 @@ uint16_t CountSensor_Get(void)
   *           函数名为预留的指定名称，可以从启动文件复制
   *           请确保函数名正确，不能有任何差异，否则中断函数将不能进入
   */
-void EXTI15_10_IRQHandler(void)
+void EXTI15_10_IRQHandler(void) 					// 10 到15 线的中断函数，这些中断线都共用这个函数
 {
 	if (EXTI_GetITStatus(EXTI_Line14) == SET)		//判断是否是外部中断14号线触发的中断
 	{
