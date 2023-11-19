@@ -30,6 +30,7 @@ int main(void)
 			}
 		}
 		Servo_SetAngle(Angle);		  // 设置舵机的角度为角度变量
+		PWM_SetCompare1(Angle/180*20000);		  // 设置LED的亮度为角度变量 *2000
 		OLED_ShowNum(1, 7, Angle, 3); // OLED显示角度变量
 	}
 }
