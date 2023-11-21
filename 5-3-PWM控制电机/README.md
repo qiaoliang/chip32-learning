@@ -46,9 +46,9 @@ TB6612 的 STBY 引脚给高电平, 正常工作状态; 如果给低电平, 则�
 
 ![OLED液晶屏](OLED.png)
 
-* GB37-520 电机
+* GB37-520 电机和电机上的引脚(霍尔编码器)
 
-![GB37-520电机](520.png)
+![GB37-520电机](520.png) ![motor_encoder](motor_encoder.png)
 
 * TB6612 电机驱动
 
