@@ -7,9 +7,9 @@
 #define SDA_OUT() {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)3<<28;}
 
 //IO操作函数
-#define OLED_IIC_SCL    PBout(6) //SCL
-#define OLED_IIC_SDA PBout(7)    // SDA
-#define OLED_ICC_READ_SDA PBin(7)    // 输入SDA
+#define OLED_IIC_SCL    PBout(8) //SCL
+#define OLED_IIC_SDA PBout(9)    // SDA
+#define OLED_ICC_READ_SDA PBin(9)    // 输入SDA
 
 //IIC所有操作函数
 void IIC_Init(void);                //初始化IIC的IO口

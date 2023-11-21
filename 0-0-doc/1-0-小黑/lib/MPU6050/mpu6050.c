@@ -3,7 +3,6 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "sys.h"
 #include "delay.h"
-#include "usart.h"
 #include "oled.h"
 
 // 函数功能：初始化DMP并显示错误原因
@@ -34,7 +33,7 @@ u8 MPU_Init(void)
     GPIO_InitTypeDef  GPIO_InitStructure;
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);    //使能AFIO时钟
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);   //先使能外设GPIOA
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);   //先使能外设GPIOA
 
 	GPIO_InitStructure.GPIO_Pin = MPU_AD0_Pin;				   // MPU AD0 端口配置
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		   //推挽输出

@@ -23,10 +23,9 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "dmpKey.h"
 #include "dmpmap.h"
-#include "usart.h"
 #include "delay.h"
 
-//¶¨ÒåÄ¿±ê°å²ÉÓÃMSP430
+//ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½MSP430
 #define  MOTION_DRIVER_TARGET_MSP430
 
 /* The following functions must be defined for this platform:
