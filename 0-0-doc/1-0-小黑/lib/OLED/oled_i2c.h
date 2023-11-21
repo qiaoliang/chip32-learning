@@ -12,6 +12,8 @@
 #define OLED_IIC_SCL_PIN GPIO_Pin_8
 #define SDA_PIN 9
 #define OLED_IIC_SDA_PIN GPIO_Pin_9
+#define OLED_IIC_PORT GPIOB
+#define OLED_IIC_PORT_CLK RCC_APB2Periph_GPIOB
 
 
 //IO操作函数
