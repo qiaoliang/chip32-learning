@@ -32,14 +32,23 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 
+float pitch, roll, yaw; // 欧拉角原始数据
+
+void Show_MPU6050(void)
+{
+	if (mpu_dmp_get_data(&pitch, &roll, &yaw) == 0) // 得到了欧拉角，存在pitch,roll,yaw里面
+	{
+		OLED_ShowAngle(pitch, roll, yaw); // oled显示角度
+	}
+}
 int main(void)
 {
-	float pitch,roll,yaw; //欧拉角原始数据
+
 
 	delay_init();         //延时函数初始化
 	OLED_Init();          //oled初始化
-	//MPU_Init();		        //MPU6050初始化
-	//DMP_Init();           //DMP初始化（DMP用来解算陀螺仪数据）
+	MPU_Init();		        //MPU6050初始化
+	DMP_Init();           //DMP初始化（DMP用来解算陀螺仪数据）
 
 /********************************************************
                   到此所有硬件准备完毕
@@ -52,12 +61,10 @@ int main(void)
 	//不断地读取陀螺仪角度并显示
 	while(1)
 	{
-		/**
-				if(mpu_dmp_get_data(&pitch, &roll, &yaw)==0) //得到了欧拉角，存在pitch,roll,yaw里面
-				{
-					OLED_ShowAngle(pitch, roll, yaw); //oled显示角度
-				}
-			}*/
+		Show_MPU6050();
+		//OLED_ShowAngle(pitch, roll, yaw); //oled显示角度
+
+
 	}
 }
 

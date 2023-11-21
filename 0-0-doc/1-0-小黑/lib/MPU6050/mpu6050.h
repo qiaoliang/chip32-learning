@@ -4,8 +4,11 @@
 #include "mpuexti.h"
 
 //MPU6050 AD0控制脚
+#define MPU_AD0_GPIO_Port          GPIOA
+#define MPU_AD0_GPIO_CLK            RCC_APB2Periph_GPIOA
+#define MPU_AD0                     15
 #define MPU_AD0_Pin                 GPIO_Pin_15
-#define MPU_AD0_CTRL            PAout(GPIO_Pin_15) // 控制AD0电平,从而控制MPU地址
+#define MPU_AD0_CTRL                PAout(MPU_AD0) // 控制AD0电平,从而控制MPU地址
 
 //#define MPU_ACCEL_OFFS_REG		0X06	//accel_offs寄存器,可读取版本号,寄存器手册未提到
 //#define MPU_PROD_ID_REG			0X0C	//prod id寄存器,在寄存器手册未提到
@@ -76,8 +79,8 @@
 #define MPU_FIFO_RW_REG			0X74	//FIFO读写寄存器
 #define MPU_DEVICE_ID_REG		0X75	//器件ID寄存器
 
-//如果AD0脚(9脚)接地,IIC地址为0X68(不包含最低位).
-//如果接V3.3,则IIC地址为0X69(不包含最低位).
+// 如果AD0脚(MPU_AD0_Pin脚)接地,IIC地址为0X68(不包含最低位).
+// 如果接V3.3,则IIC地址为0X69(不包含最低位).
 #define MPU_ADDR				0X68
 
 
