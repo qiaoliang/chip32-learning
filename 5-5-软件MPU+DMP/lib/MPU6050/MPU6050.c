@@ -1,112 +1,267 @@
-#include "stm32f10x.h"                  // Device header
-#include "MPU_I2C.h"
-#include "MPU6050_Reg.h"
-#include "MPU6050.h"
-//#define MPU6050_ADDRESS		0xD0		//MPU6050的I2C从机地址
+#include "mpu6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "sys.h"
+#include "Delay.h"
+#include "oled.h"
 
-/**
-  * 函    数：MPU6050写寄存器
-  * 参    数：RegAddress 寄存器地址，范围：参考MPU6050手册的寄存器描述
-  * 参    数：Data 要写入寄存器的数据，范围：0x00~0xFF
-  * 返 回 值：无
-  */
-void MPU6050_WriteReg(uint8_t RegAddress, uint8_t Data)
+// 函数功能：初始化DMP并显示错误原因
+// 作者：小黑
+// 创建时间：2021/5/5
+void DMP_Init(void)
 {
-	MPU_I2C_Start();						//I2C起始
-	MPU_I2C_SendByte(MPU6050_ADDRESS);	//发送从机地址，读写位为0，表示即将写入
-	MPU_I2C_ReceiveAck();					//接收应答
-	MPU_I2C_SendByte(RegAddress);			//发送寄存器地址
-	MPU_I2C_ReceiveAck();					//接收应答
-	MPU_I2C_SendByte(Data);				//发送要写入寄存器的数据
-	MPU_I2C_ReceiveAck();					//接收应答
-	MPU_I2C_Stop();						//I2C终止
+	int i=1;
+	int dmp_error; //记录dmp错误原因
+	OLED_ShowStr(0,4,"DMP ing...",1);
+	OLED_ShowStr(0,5,"Attempts:",1); //尝试次数
+	OLED_ShowStr(0,6,"Error:",1);    //错误原因
+	while(dmp_error = mpu_dmp_init())//DMP初始化（此处报warning不用管）
+	{
+		OLED_ShowNum(60,5,i++,1);
+		OLED_ShowNum(42,6,dmp_error,1);
+		Delay_ms(200);
+	}
+	OLED_ShowStr(0,4,"DMP OK!   ",1);
+	Delay_ms(1000);
+	OLED_Clear(); //清屏
 }
 
-/**
-  * 函    数：MPU6050读寄存器
-  * 参    数：RegAddress 寄存器地址，范围：参考MPU6050手册的寄存器描述
-  * 返 回 值：读取寄存器的数据，范围：0x00~0xFF
-  */
-uint8_t MPU6050_ReadReg(uint8_t RegAddress)
+
+u8 MPU_Init(void)
 {
-	uint8_t Data;
+	u8 res;
+    GPIO_InitTypeDef  GPIO_InitStructure;
 
-	MPU_I2C_Start();						//I2C起始
-	MPU_I2C_SendByte(MPU6050_ADDRESS);	//发送从机地址，读写位为0，表示即将写入
-	MPU_I2C_ReceiveAck();					//接收应答
-	MPU_I2C_SendByte(RegAddress);			//发送寄存器地址
-	MPU_I2C_ReceiveAck();					//接收应答
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);    //使能AFIO时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);   //先使能外设GPIOA
 
-	MPU_I2C_Start();						//I2C重复起始
-	MPU_I2C_SendByte(MPU6050_ADDRESS | 0x01);	//发送从机地址，读写位为1，表示即将读取
-	MPU_I2C_ReceiveAck();					//接收应答
-	Data = MPU_I2C_ReceiveByte();			//接收指定寄存器的数据
-	MPU_I2C_SendAck(1);					//发送应答，给从机非应答，终止从机的数据输出
-	MPU_I2C_Stop();						//I2C终止
+	GPIO_InitStructure.GPIO_Pin = MPU_AD0_Pin;				   // MPU AD0 端口配置
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		   //推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		   //IO口速度为50MHz
+    GPIO_Init(GPIOA, &GPIO_InitStructure);					       //根据设定参数初始化GPIOA
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);//禁止JTAG,从而PA15可以做普通IO使用,否则PA15不能做普通IO!!!
+	MPU_AD0_CTRL=0; //控制MPU6050的AD0脚为低电平,从机地址为:0X68(7位)
 
-	return Data;
+	//初始化陀螺仪的IIC总线：
+	MPU_IIC_Init();
+	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050
+    Delay_ms(100);
+	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050
+	MPU_Set_Gyro_Fsr(3);					//陀螺仪传感器,±2000dps
+	MPU_Set_Accel_Fsr(0);					//加速度传感器,±2g
+	MPU_Set_Rate(50);						//设置采样率50Hz
+	MPU_Write_Byte(MPU_INT_EN_REG,0X00);	//关闭所有中断
+	MPU_Write_Byte(MPU_USER_CTRL_REG,0X00);	//I2C主模式关闭
+	MPU_Write_Byte(MPU_FIFO_EN_REG,0X00);	//关闭FIFO
+	MPU_Write_Byte(MPU_INTBP_CFG_REG,0X80);	//INT引脚低电平有效
+	res=MPU_Read_Byte(MPU_DEVICE_ID_REG);
+	if(res==MPU_ADDR)//器件ID正确
+	{
+		MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X01);	//设置CLKSEL,PLL X轴为参考
+		MPU_Write_Byte(MPU_PWR_MGMT2_REG,0X00);	//加速度与陀螺仪都工作
+		MPU_Set_Rate(50);						//设置采样率为50Hz
+ 	}
+	else
+	{
+		OLED_ShowStr(0,2,"MPU6050 err",1);
+		return 1;
+	}
+
+	OLED_ShowStr(0,2,"MPU6050 OK!",1);
+	Delay_ms(50);
+	return 0;
+}
+//设置MPU6050陀螺仪传感器满量程范围
+//fsr:0,±250dps;1,±500dps;2,±1000dps;3,±2000dps
+//返回值:0,设置成功
+//    其他,设置失败
+u8 MPU_Set_Gyro_Fsr(u8 fsr)
+{
+	return MPU_Write_Byte(MPU_GYRO_CFG_REG,fsr<<3);//设置陀螺仪满量程范围
+}
+//设置MPU6050加速度传感器满量程范围
+//fsr:0,±2g;1,±4g;2,±8g;3,±16g
+//返回值:0,设置成功
+//    其他,设置失败
+u8 MPU_Set_Accel_Fsr(u8 fsr)
+{
+	return MPU_Write_Byte(MPU_ACCEL_CFG_REG,fsr<<3);//设置加速度传感器满量程范围
+}
+//设置MPU6050的数字低通滤波器
+//lpf:数字低通滤波频率(Hz)
+//返回值:0,设置成功
+//    其他,设置失败
+u8 MPU_Set_LPF(u16 lpf)
+{
+	u8 data=0;
+	if(lpf>=188)data=1;
+	else if(lpf>=98)data=2;
+	else if(lpf>=42)data=3;
+	else if(lpf>=20)data=4;
+	else if(lpf>=10)data=5;
+	else data=6;
+	return MPU_Write_Byte(MPU_CFG_REG,data);//设置数字低通滤波器
+}
+//设置MPU6050的采样率(假定Fs=1KHz)
+//rate:4~1000(Hz)
+//返回值:0,设置成功
+//    其他,设置失败
+u8 MPU_Set_Rate(u16 rate)
+{
+	u8 data;
+	if(rate>1000)rate=1000;
+	if(rate<4)rate=4;
+	data=1000/rate-1;
+	data=MPU_Write_Byte(MPU_SAMPLE_RATE_REG,data);	//设置数字低通滤波器
+ 	return MPU_Set_LPF(rate/2);	//自动设置LPF为采样率的一半
 }
 
-/**
-  * 函    数：MPU6050初始化
-  * 参    数：无
-  * 返 回 值：无
-  */
-void MPU6050_Init(void)
+//得到温度值
+//返回值:温度值(扩大了100倍)
+short MPU_Get_Temperature(void)
 {
-	MPU_I2C_Init();									//先初始化底层的I2C
-
-	/*MPU6050寄存器初始化，需要对照MPU6050手册的寄存器描述配置，此处仅配置了部分重要的寄存器*/
-	MPU6050_WriteReg(MPU6050_PWR_MGMT_1, 0x01);		//电源管理寄存器1，取消睡眠模式，选择时钟源为X轴陀螺仪
-	MPU6050_WriteReg(MPU6050_PWR_MGMT_2, 0x00);		//电源管理寄存器2，保持默认值0，所有轴均不待机
-	MPU6050_WriteReg(MPU6050_SMPLRT_DIV, 0x09);		//采样率分频寄存器，配置采样率
-	MPU6050_WriteReg(MPU6050_CONFIG, 0x06);			//配置寄存器，配置DLPF
-	MPU6050_WriteReg(MPU6050_GYRO_CONFIG, 0x18);	//陀螺仪配置寄存器，选择满量程为±2000°/s
-	MPU6050_WriteReg(MPU6050_ACCEL_CONFIG, 0x18);	//加速度计配置寄存器，选择满量程为±16g
+    u8 buf[2];
+    short raw;
+	float temp;
+	MPU_Read_Len(MPU_ADDR,MPU_TEMP_OUTH_REG,2,buf);
+    raw=((u16)buf[0]<<8)|buf[1];
+    temp=36.53+((double)raw)/340;
+    return temp*100;;
 }
-
-/**
-  * 函    数：MPU6050获取ID号
-  * 参    数：无
-  * 返 回 值：MPU6050的ID号
-  */
-uint8_t MPU6050_GetID(void)
+//得到陀螺仪值(原始值)
+//gx,gy,gz:陀螺仪x,y,z轴的原始读数(带符号)
+//返回值:0,成功
+//    其他,错误代码
+u8 MPU_Get_Gyroscope(short *gx,short *gy,short *gz)
 {
-	return MPU6050_ReadReg(MPU6050_WHO_AM_I);		//返回WHO_AM_I寄存器的值
+    u8 buf[6],res;
+	res=MPU_Read_Len(MPU_ADDR,MPU_GYRO_XOUTH_REG,6,buf);
+	if(res==0)
+	{
+		*gx=((u16)buf[0]<<8)|buf[1];
+		*gy=((u16)buf[2]<<8)|buf[3];
+		*gz=((u16)buf[4]<<8)|buf[5];
+	}
+    return res;;
 }
-
-/**
-  * 函    数：MPU6050获取数据
-  * 参    数：AccX AccY AccZ 加速度计X、Y、Z轴的数据，使用输出参数的形式返回，范围：-32768~32767
-  * 参    数：GyroX GyroY GyroZ 陀螺仪X、Y、Z轴的数据，使用输出参数的形式返回，范围：-32768~32767
-  * 返 回 值：无
-  */
-void MPU6050_GetData(int16_t *AccX, int16_t *AccY, int16_t *AccZ,
-						int16_t *GyroX, int16_t *GyroY, int16_t *GyroZ)
+//得到加速度值(原始值)
+//gx,gy,gz:陀螺仪x,y,z轴的原始读数(带符号)
+//返回值:0,成功
+//    其他,错误代码
+u8 MPU_Get_Accelerometer(short *ax,short *ay,short *az)
 {
-	uint8_t DataH, DataL;								//定义数据高8位和低8位的变量
-
-	DataH = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_H);		//读取加速度计X轴的高8位数据
-	DataL = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_L);		//读取加速度计X轴的低8位数据
-	*AccX = (DataH << 8) | DataL;						//数据拼接，通过输出参数返回
-
-	DataH = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_H);		//读取加速度计Y轴的高8位数据
-	DataL = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_L);		//读取加速度计Y轴的低8位数据
-	*AccY = (DataH << 8) | DataL;						//数据拼接，通过输出参数返回
-
-	DataH = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_H);		//读取加速度计Z轴的高8位数据
-	DataL = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_L);		//读取加速度计Z轴的低8位数据
-	*AccZ = (DataH << 8) | DataL;						//数据拼接，通过输出参数返回
-
-	DataH = MPU6050_ReadReg(MPU6050_GYRO_XOUT_H);		//读取陀螺仪X轴的高8位数据
-	DataL = MPU6050_ReadReg(MPU6050_GYRO_XOUT_L);		//读取陀螺仪X轴的低8位数据
-	*GyroX = (DataH << 8) | DataL;						//数据拼接，通过输出参数返回
-
-	DataH = MPU6050_ReadReg(MPU6050_GYRO_YOUT_H);		//读取陀螺仪Y轴的高8位数据
-	DataL = MPU6050_ReadReg(MPU6050_GYRO_YOUT_L);		//读取陀螺仪Y轴的低8位数据
-	*GyroY = (DataH << 8) | DataL;						//数据拼接，通过输出参数返回
-
-	DataH = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_H);		//读取陀螺仪Z轴的高8位数据
-	DataL = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_L);		//读取陀螺仪Z轴的低8位数据
-	*GyroZ = (DataH << 8) | DataL;						//数据拼接，通过输出参数返回
+    u8 buf[6],res;
+	res=MPU_Read_Len(MPU_ADDR,MPU_ACCEL_XOUTH_REG,6,buf);
+	if(res==0)
+	{
+		*ax=((u16)buf[0]<<8)|buf[1];
+		*ay=((u16)buf[2]<<8)|buf[3];
+		*az=((u16)buf[4]<<8)|buf[5];
+	}
+    return res;;
+}
+//IIC连续写
+//addr:器件地址
+//reg:寄存器地址
+//len:写入长度
+//buf:数据区
+//返回值:0,正常
+//    其他,错误代码
+u8 MPU_Write_Len(u8 addr,u8 reg,u8 len,u8 *buf)
+{
+	u8 i;
+    MPU_IIC_Start();
+	MPU_IIC_Send_Byte((addr<<1)|0);//发送器件地址+写命令
+	if(MPU_IIC_Wait_Ack())	//等待应答
+	{
+		MPU_IIC_Stop();
+		return 1;
+	}
+    MPU_IIC_Send_Byte(reg);	//写寄存器地址
+    MPU_IIC_Wait_Ack();		//等待应答
+	for(i=0;i<len;i++)
+	{
+		MPU_IIC_Send_Byte(buf[i]);	//发送数据
+		if(MPU_IIC_Wait_Ack())		//等待ACK
+		{
+			MPU_IIC_Stop();
+			return 1;
+		}
+	}
+    MPU_IIC_Stop();
+	return 0;
+}
+//IIC连续读
+//addr:器件地址
+//reg:要读取的寄存器地址
+//len:要读取的长度
+//buf:读取到的数据存储区
+//返回值:0,正常
+//    其他,错误代码
+u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf)
+{
+ 	MPU_IIC_Start();
+	MPU_IIC_Send_Byte((addr<<1)|0);//发送器件地址+写命令
+	if(MPU_IIC_Wait_Ack())	//等待应答
+	{
+		MPU_IIC_Stop();
+		return 1;
+	}
+    MPU_IIC_Send_Byte(reg);	//写寄存器地址
+    MPU_IIC_Wait_Ack();		//等待应答
+    MPU_IIC_Start();
+	MPU_IIC_Send_Byte((addr<<1)|1);//发送器件地址+读命令
+    MPU_IIC_Wait_Ack();		//等待应答
+	while(len)
+	{
+		if(len==1)*buf=MPU_IIC_Read_Byte(0);//读数据,发送nACK
+		else *buf=MPU_IIC_Read_Byte(1);		//读数据,发送ACK
+		len--;
+		buf++;
+	}
+    MPU_IIC_Stop();	//产生一个停止条件
+	return 0;
+}
+//IIC写一个字节
+//reg:寄存器地址
+//data:数据
+//返回值:0,正常
+//    其他,错误代码
+u8 MPU_Write_Byte(u8 reg,u8 data)
+{
+    MPU_IIC_Start();
+	MPU_IIC_Send_Byte((MPU_ADDR<<1)|0);//发送器件地址+写命令
+	if(MPU_IIC_Wait_Ack())	//等待应答
+	{
+		MPU_IIC_Stop();
+		return 1;
+	}
+    MPU_IIC_Send_Byte(reg);	//写寄存器地址
+    MPU_IIC_Wait_Ack();		//等待应答
+	MPU_IIC_Send_Byte(data);//发送数据
+	if(MPU_IIC_Wait_Ack())	//等待ACK
+	{
+		MPU_IIC_Stop();
+		return 1;
+	}
+    MPU_IIC_Stop();
+	return 0;
+}
+//IIC读一个字节
+//reg:寄存器地址
+//返回值:读到的数据
+u8 MPU_Read_Byte(u8 reg)
+{
+	u8 res;
+    MPU_IIC_Start();
+	MPU_IIC_Send_Byte((MPU_ADDR<<1)|0);//发送器件地址+写命令
+	MPU_IIC_Wait_Ack();		//等待应答
+    MPU_IIC_Send_Byte(reg);	//写寄存器地址
+    MPU_IIC_Wait_Ack();		//等待应答
+    MPU_IIC_Start();
+	MPU_IIC_Send_Byte((MPU_ADDR<<1)|1);//发送器件地址+读命令
+    MPU_IIC_Wait_Ack();		//等待应答
+	res=MPU_IIC_Read_Byte(0);//读取数据,发送nACK
+    MPU_IIC_Stop();			//产生一个停止条件
+	return res;
 }

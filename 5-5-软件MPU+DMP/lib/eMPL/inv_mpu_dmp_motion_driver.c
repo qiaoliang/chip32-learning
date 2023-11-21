@@ -23,10 +23,9 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "dmpKey.h"
 #include "dmpmap.h"
-#include "usart.h"
-#include "delay.h"
+#include "Delay.h"
 
-//¶¨ÒåÄ¿±ê°å²ÉÓÃMSP430
+//ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½MSP430
 #define  MOTION_DRIVER_TARGET_MSP430
 
 /* The following functions must be defined for this platform:
@@ -34,7 +33,7 @@
  *      unsigned char length, unsigned char const *data)
  * i2c_read(unsigned char slave_addr, unsigned char reg_addr,
  *      unsigned char length, unsigned char *data)
- * delay_ms(unsigned long num_ms)
+ * Delay_ms(unsigned long num_ms)
  * get_ms(unsigned long *count)
  */
 #if defined MOTION_DRIVER_TARGET_MSP430
