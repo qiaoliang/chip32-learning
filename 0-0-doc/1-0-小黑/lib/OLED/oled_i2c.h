@@ -6,10 +6,18 @@
 #define SDA_IN()  {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)8<<28;}
 #define SDA_OUT() {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)3<<28;}
 
+
+
+#define SCL_PIN 8
+#define OLED_IIC_SCL_PIN GPIO_Pin_8
+#define SDA_PIN 9
+#define OLED_IIC_SDA_PIN GPIO_Pin_9
+
+
 //IO操作函数
-#define OLED_IIC_SCL    PBout(8) //SCL
-#define OLED_IIC_SDA PBout(9)    // SDA
-#define OLED_ICC_READ_SDA PBin(9)    // 输入SDA
+#define OLED_IIC_SCL PBout(SCL_PIN)    // SCL
+#define OLED_IIC_SDA PBout(SDA_PIN)    // SDA
+#define OLED_ICC_READ_SDA PBin(SDA_PIN)    // 输入SDA
 
 //IIC所有操作函数
 void IIC_Init(void);                //初始化IIC的IO口
