@@ -26,35 +26,13 @@ void Motor_Init(void)
 
 	PWM_Init();													//初始化直流电机的底层PWM
 }
-
-/**
-  * 函    数：直流电机设置速度
-  * 参    数：Speed 要设置的速度，范围：-100~100
-  * 返 回 值：无
-  */
-void Motor_SetSpeed(int8_t Speed)
+void left_positive()
 {
-	if (Speed >= 0)							//如果设置正转的速度值
-	{
-		left_positive();
-		right_positive();
-		PWM_SetCompare2(Speed); // PWM设置为速度值
-		PWM_SetCompare3(PWM_MAX - Speed); // 这里为什么是7200-PWM，因为高级定时器的某些通道PWM输出反相，示波器测一下就知道了，群公告里也有写
-	}
-	else									//否则，即设置反转的速度值
-	{
-		left_negative();
-		right_negative();
-		PWM_SetCompare2(-Speed); // PWM设置为负的速度值，因为此时速度值为负数，而PWM只能给正数
-		PWM_SetCompare3(PWM_MAX + Speed);
-	}
-}
-
-void left_positive(){
 	GPIO_SetBits(GPIOA, GPIO_Pin_4);   // PA4置高电平
 	GPIO_ResetBits(GPIOA, GPIO_Pin_5); // PA5置低电平，设置方向为正转
 }
-void left_negative(){
+void left_negative()
+{
 	GPIO_ResetBits(GPIOA, GPIO_Pin_4); // PA4置低电平
 	GPIO_SetBits(GPIOA, GPIO_Pin_5);   // PA5置高电平，设置方向为反转
 }
@@ -69,3 +47,26 @@ void right_negative()
 	GPIO_ResetBits(GPIOB, GPIO_Pin_13);
 	GPIO_SetBits(GPIOB, GPIO_Pin_14);
 }
+/**
+  * 函    数：直流电机设置速度
+  * 参    数：Speed 要设置的速度，范围：-100~100
+  * 返 回 值：无
+  */
+void Motor_SetSpeed(int8_t Speed)
+{
+	if (Speed >= 0)							//如果设置正转的速度值
+	{
+		left_positive();
+		right_positive();
+		PWM_SetCompare2(Speed); // PWM设置为速度值
+		PWM_SetCompare3(Speed); // PWM设置为速度值
+	}
+	else									//否则，即设置反转的速度值
+	{
+		left_negative();
+		right_negative();
+		PWM_SetCompare2(-Speed);
+		PWM_SetCompare3(-Speed);
+	}
+}
+
