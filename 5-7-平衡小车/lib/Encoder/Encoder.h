@@ -22,6 +22,7 @@
 #define Encoder_Right_TIMER TIM4
 
 void Encoder_Init(void);
-int16_t Encoder_Get(void);
+int16_t Encoder_Left_Get(void);
+int16_t Encoder_Right_Get(void);
 
 #endif
