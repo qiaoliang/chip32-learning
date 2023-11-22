@@ -1,7 +1,7 @@
 #include "PWM.h"
 
 /**
-  * 函    数：PWM初始化
+  * 函    数：PWM初始化 . 占用 PA2 和 PA3
   * 参    数：无
   * 返 回 值：无
   */
@@ -14,7 +14,7 @@ void PWM_Init(void)
 	/*GPIO初始化*/
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2| GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);							//将PA2引脚初始化为复用推挽输出
 																	//受外设控制的引脚，均需要配置为复用模式
@@ -41,9 +41,12 @@ void PWM_Init(void)
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;   //输出使能
 	TIM_OCInitStructure.TIM_Pulse = 0;								//初始的CCR值
 	TIM_OC3Init(TIM2, &TIM_OCInitStructure);                        //将结构体变量交给TIM_OC3Init，配置TIM2的输出比较通道3
+	TIM_OC2Init(TIM2, &TIM_OCInitStructure);						// 将结构体变量交给TIM_OC2Init，配置TIM2的输出比较通道2
 
 	/*TIM使能*/
 	TIM_Cmd(TIM2, ENABLE);			//使能TIM2，定时器开始运行
+	PWM_SetCompare2(0);				// 初始先设置通道 3 的占空比为 0.
+	PWM_SetCompare3(0);             // 初始先设置通道 3 的占空比为 0.
 }
 
 /**
@@ -57,10 +60,15 @@ void PWM_SetCompare3(uint16_t Compare)
 {
 	TIM_SetCompare3(TIM2, Compare);		//设置CCR3的值
 }
-void PWM_Limited(int *PWM){
+
+void PWM_SetCompare2(uint16_t Compare)
+{
+	TIM_SetCompare2(TIM2, Compare); // 设置CCR2的值
+}
+void PWM_Limited(int *PWM)
+{
 	if (*PWM > PWM_MAX)
 		*PWM = PWM_MAX;
 	if (*PWM < -PWM_MAX)
 		*PWM = -PWM_MAX;
 }
-

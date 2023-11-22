@@ -63,16 +63,25 @@ int main(void)
 	OLED_ShowStr(0,0,"Pitch: ",2);
 	OLED_ShowStr(0,2,"Roll: ",2);
 	OLED_ShowStr(0,4,"Yaw: ",2);
-
-	//不断地读取陀螺仪角度并显示
-	while(1)
+	OLED_ShowStr(0,6, "Velo: ", 2);
+	while (1)
 	{
-		//Show_MPU6050();
-		OLED_ShowAngle(pitch, roll, yaw); //oled显示角度
-		OLED_ShowVelocity(velocity);
+		// 【1】安全装置：
+		if (roll < -30 || roll > 30) // 小车可能已经倒了
+		{
+			motor_flag = 0;			 // 关闭电机
+			velocity_sum = 0;		 // 速度积分清0
+			TIM_SetCounter(TIM3, 0);  // TIM3 用于 Encoder了.
+			// TIM_SetCounter(TIM2, 0); // TIM2 用于 PWM了.
+		}
+		else
+			motor_flag = 1; // 开启电机
+
+		// 【2】状态显示：
+		OLED_ShowAngle(pitch, roll, yaw); // 显示欧拉角
+		OLED_ShowVelocity(velocity);	   // 显示速度（非真实速度）
 	}
 }
-
 /////////////////////////////////////////////////////////////////////
 
 //第二种使用方式：用中断（陀螺仪的INT引脚会在读取到欧拉角后输出中断信号）

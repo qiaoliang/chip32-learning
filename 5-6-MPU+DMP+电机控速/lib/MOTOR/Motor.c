@@ -31,7 +31,7 @@ void Motor_SetSpeed(int8_t Speed)
 	{
 		left_positive();
 		right_positive();
-		PWM_SetCompare3(Speed); // PWM设置为速度值
+		PWM_SetCompare2(Speed); // PWM设置为速度值
 		//TIM_SetCompare1(TIM1, PWM_MAX - Speed); // 这里为什么是7200-PWM，因为高级定时器的某些通道PWM输出反相，示波器测一下就知道了，群公告里也有写
 	}
 	else									//否则，即设置反转的速度值
