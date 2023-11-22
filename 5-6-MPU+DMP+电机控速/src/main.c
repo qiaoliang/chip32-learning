@@ -29,6 +29,20 @@ void Show_MPU6050(void)
 		OLED_ShowAngle(pitch, roll, yaw); // oled显示角度
 	}
 }
+
+void OLED_ShowVelocity(int velocity)
+{
+
+	if (velocity < 0)
+	{
+		OLED_ShowStr(50, 0, "-", 2); // 显示负号
+		velocity = -velocity;
+	}
+	else
+		OLED_ShowStr(50, 6, " ", 2); // 掩盖负号
+	OLED_Shownum2(58, 6, velocity, 2);
+}
+
 int main(void)
 {
 
@@ -55,8 +69,7 @@ int main(void)
 	{
 		//Show_MPU6050();
 		OLED_ShowAngle(pitch, roll, yaw); //oled显示角度
-
-
+		OLED_ShowVelocity(velocity);
 	}
 }
 
