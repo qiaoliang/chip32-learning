@@ -5,8 +5,17 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "OLED.h"
 #include "delay.h"
-float pitch,roll,yaw; //欧拉角原始数据
+#include "Encoder.h"
+#include "pid.h"
+#include "PWM.h"
+#include "Motor.h"
 
+extern float zhongzhi;	// roll理论值（小车平衡时的角度）
+extern int motor_flag;	// 电机使能标志
+float pitch, roll, yaw; // 欧拉角
+float measure, calcu;	// 测量值和理论值
+int velocity;			// 速度测量值（编码器脉冲数，非真实速度）
+int PWM;				// PWM值
 
 //函数功能：初始化接收陀螺仪中断的引脚
 void MPU_exti_init()
@@ -36,14 +45,26 @@ void MPU_exti_init()
 	NVIC_Init(&NVIC_InitStructure);
 }
 
-
-//外部中断线12服务程序（10ms中断）
+// 外部中断线12服务程序（10ms中断）
+//  外部中断线12服务程序，PID控制在此函数中
 void EXTI15_10_IRQHandler(void)
 {
-	if(mpu_dmp_get_data(&pitch,&roll,&yaw)==0)
+	if (mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
 	{
-		//此时欧拉角已更新,存在pitch,roll,yaw里面
+		measure = roll;	  // roll测量值
+		calcu = zhongzhi; // roll理论值
+
+		//velocity = (Encoder_Get() + read_encoder3()) / 2; // 速度测量值
+		velocity = Encoder_Get();  // 这里先只读一个轮子的编码值
+		// PID计算：直立环+速度环（完整版本还要加转向环，转向环怎么写怎么调，请看群公告）
+		PWM = vertical_PID_value(measure, calcu) + velocity_PID_value(velocity);
+		PWM_Limited(&PWM); // PWM限幅
+
+		if (motor_flag)
+			Motor_SetSpeed(PWM); // 给电机PWM
+		else
+			Motor_SetSpeed(0); // 关闭电机
 	}
 
-	EXTI_ClearITPendingBit(EXTI_Line12); //清除LINE上的中断标志位
+	EXTI_ClearITPendingBit(EXTI_Line12); // 清除LINE0上的中断标志位
 }

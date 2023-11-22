@@ -8,8 +8,20 @@
 #include "Encoder.h"
 #include "Key.h"
 
-float pitch, roll, yaw; // 欧拉角原始数据
+extern float pitch, roll, yaw; // 欧拉角测量值
+float zhongzhi = 0;			   // roll理论值（小车平衡时的角度）
+extern int velocity;		   // 速度测量值（编码器脉冲数，非真实速度）
+extern float velocity_sum;	   // 速度积分
+int motor_flag;				   // 电机使能标志：1使能  0失能
 
+// 直立环PD参数:
+float Kp = -420, Ki = 0, Kd = -2000; // 调完速度环后精调
+// float Kp=-420,Ki=0,Kd=-960; //乘0.6
+// float Kp=-700,Ki=0,Kd=-1600;
+// float Kp=0,Ki=0,Kd=0;
+
+// 速度环PI参数:
+float VKp = +190, VKi = 0.95;
 void Show_MPU6050(void)
 {
 	if (mpu_dmp_get_data(&pitch, &roll, &yaw) == 0) // 得到了欧拉角，存在pitch,roll,yaw里面
