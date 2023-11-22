@@ -6,7 +6,7 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "Motor.h"
 #include "Encoder.h"
-#include "Key.h"
+#include "PWM.h"
 
 extern float pitch, roll, yaw; // 欧拉角测量值
 float zhongzhi = 0;			   // roll理论值（小车平衡时的角度）
@@ -53,7 +53,7 @@ int main(void)
 	DMP_Init();           //DMP初始化（DMP用来解算陀螺仪数据）
 	MPU_exti_init();	  // 陀螺仪外部中断初始化（放最后）
 	Motor_Init();		  // 直流电机初始化
-	Key_Init();			  // 按键初始化
+	PWM_Init();
 	Encoder_Init();		  // 初始化电机编码器
 
 	/********************************************************

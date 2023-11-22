@@ -51,7 +51,7 @@ void EXTI15_10_IRQHandler(void)
 {
 	if (mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
 	{
-		measure = roll;	  // roll测量值
+		measure = pitch;  // pitch测量值
 		calcu = zhongzhi; // roll理论值
 
 		//velocity = (Encoder_Get() + read_encoder3()) / 2; // 速度测量值

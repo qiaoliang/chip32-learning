@@ -1,12 +1,3 @@
-/******************************************************  
- 本程序只供学习使用，未经作者许可，不得用于其它任何用途
- 平衡小车（开源版）
- 作者：WangGuanNan
- QQ：1501451224
- //////////////////////////////////////////////////////
- 创建时间：2021/7/11
- 版本：V1.0 仅平衡
-******************************************************/
 #include "pid.h"
 
 extern float Kp,Ki,Kd;   //直立环参数
@@ -29,7 +20,7 @@ int vertical_PID_value(float measure,float calcu)
 	err_sum+=err;                      //误差的累加
 	err_difference = err - last_err;   //误差的差值
 	last_err = err;                    //此次误差记录为“上次误差”
-	
+
 	return Kp*err + Ki*err_sum + Kd*err_difference;
 }
 
