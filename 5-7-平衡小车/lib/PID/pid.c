@@ -25,7 +25,7 @@ int vertical_PID_value(float measure,float calcu)
 }
 
 
-//速度环：（这个速度环是简写形式的，完整形式应该和上面的直立环一样包含两个入口参数，详见群公告，或者可以自己参照着写）
+//速度环：（速度环只使用了P和I,没有使用 D.）
 int velocity_PID_value(int velocity)
 {
 	float a=0.3;                                           //滤波系数（反映滤波程度）
