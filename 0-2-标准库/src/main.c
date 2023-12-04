@@ -13,21 +13,15 @@ int main(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(LEDPORT, &GPIO_InitStructure);
 
+
 	while (1)
 	{
+
+
 		GPIO_ResetBits(LEDPORT, LEDBUILDIN);
 		Delay_ms(500);
 		GPIO_SetBits(LEDPORT, LEDBUILDIN);
 		Delay_ms(500);
 
-		GPIO_WriteBit(LEDPORT, LEDBUILDIN, Bit_RESET);
-		Delay_ms(500);
-		GPIO_WriteBit(LEDPORT, LEDBUILDIN, Bit_SET);
-		Delay_ms(500);
-
-		GPIO_WriteBit(LEDPORT, LEDBUILDIN, (BitAction)0);
-		Delay_ms(500);
-		GPIO_WriteBit(LEDPORT, LEDBUILDIN, (BitAction)1);
-		Delay_ms(500);
 	}
 }
