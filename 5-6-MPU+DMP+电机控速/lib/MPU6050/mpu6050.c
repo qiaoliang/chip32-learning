@@ -5,6 +5,7 @@
 #include "Delay.h"
 #include "oled.h"
 
+//#define MPU6050
 // 函数功能：初始化DMP并显示错误原因
 // 作者：小黑
 // 创建时间：2021/5/5
@@ -15,10 +16,18 @@ void DMP_Init(void)
 	OLED_ShowStr(0,4,"DMP ing...",1);
 	OLED_ShowStr(0,5,"Attempts:",1); //尝试次数
 	OLED_ShowStr(0,6,"Error:",1);    //错误原因
-	while(dmp_error = mpu_dmp_init())//DMP初始化（此处报warning不用管）
+	while(1)//DMP初始化（此处报warning不用管）
 	{
+		dmp_error = mpu_dmp_init();
+		if(dmp_error == 0) break;
 		OLED_ShowNum(60,5,i++,1);
-		OLED_ShowNum(42,6,dmp_error,1);
+		if(dmp_error < 0){
+		  OLED_ShowStr(42,6, "-",2);
+		  dmp_error = -dmp_error;
+		}else{
+			OLED_ShowStr(42, 6, " ", 2); // 掩盖负号
+		}
+		OLED_ShowNum(49,6,dmp_error,1);
 		Delay_ms(200);
 	}
 	OLED_ShowStr(0,4,"DMP OK!   ",1);
@@ -37,6 +46,7 @@ u8 MPU_Init(void)
 
 	GPIO_InitStructure.GPIO_Pin = MPU_AD0_Pin;				   // MPU AD0 端口配置
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		   //推挽输出
+
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		   //IO口速度为50MHz
     GPIO_Init(GPIOA, &GPIO_InitStructure);					       //根据设定参数初始化GPIOA
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);//禁止JTAG,从而PA15可以做普通IO使用,否则PA15不能做普通IO!!!
@@ -64,7 +74,8 @@ u8 MPU_Init(void)
  	}
 	else
 	{
-		OLED_ShowStr(0,2,"MPU6050 err",1);
+	    OLED_ShowNum(0,2,res,1);
+		OLED_ShowStr(30,2,"MPU6050 err",1);
 		return 1;
 	}
 

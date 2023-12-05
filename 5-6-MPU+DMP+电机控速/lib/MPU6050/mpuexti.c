@@ -64,6 +64,10 @@ void EXTI15_10_IRQHandler(void)
 			Motor_SetSpeed(PWM); // 给电机PWM
 		else
 			Motor_SetSpeed(0); // 关闭电机
+	}else{
+		pitch = 1.9;
+		roll = 1.9;
+		yaw = 1.9;
 	}
 
 	EXTI_ClearITPendingBit(EXTI_Line12); // 清除LINE0上的中断标志位

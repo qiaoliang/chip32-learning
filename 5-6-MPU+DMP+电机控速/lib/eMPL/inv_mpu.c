@@ -771,12 +771,12 @@ int mpu_init(void)
     /* Wake up chip. */
     data[0] = 0x00;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
-        return -1;
+        return -2;
 
 #if defined MPU6050
     /* Check product revision. */
     if (i2c_read(st.hw->addr, st.reg->accel_offs, 6, data))
-        return -1;
+        return -3;
     rev = ((data[5] & 0x01) << 2) | ((data[3] & 0x01) << 1) |
         (data[1] & 0x01);
 
@@ -788,16 +788,16 @@ int mpu_init(void)
             st.chip_cfg.accel_half = 0;
         else {
             log_e("Unsupported software product rev %d.\n", rev);
-            return -1;
+            return -4;
         }
     } else {
         if (i2c_read(st.hw->addr, st.reg->prod_id, 1, data))
-            return -1;
+            return -5;
         rev = data[0] & 0x0F;
         if (!rev) {
             log_e("Product ID read as 0 indicates device is either "
                 "incompatible or an MPU3050.\n");
-            return -1;
+            return -6;
         } else if (rev == 4) {
             log_i("Half sensitivity part found.\n");
             st.chip_cfg.accel_half = 1;
@@ -807,12 +807,12 @@ int mpu_init(void)
 #elif defined MPU6500
 #define MPU6500_MEM_REV_ADDR    (0x17)
     if (mpu_read_mem(MPU6500_MEM_REV_ADDR, 1, &rev))
-        return -1;
+        return -7;
     if (rev == 0x1)
         st.chip_cfg.accel_half = 0;
     else {
         log_e("Unsupported software product rev %d.\n", rev);
-        return -1;
+        return -8;
     }
 
     /* MPU6500 shares 4kB of memory between the DMP and the FIFO. Since the
@@ -820,7 +820,7 @@ int mpu_init(void)
      */
     data[0] = BIT_FIFO_SIZE_1024 | 0x8;
     if (i2c_write(st.hw->addr, st.reg->accel_cfg2, 1, data))
-        return -1;
+        return -9;
 #endif
 
     /* Set to invalid values to ensure no I2C writes are skipped. */
@@ -2962,8 +2962,10 @@ u8 mpu_dmp_init(void)
 {
 	u8 res=0;
 	MPU_IIC_Init(); 	//初始化IIC总线
-	if(mpu_init()==0)	//初始化MPU6050
-	{
+    int ret= mpu_init() ;
+    if (ret== 0) // 初始化MPU6050
+    {
+        res = ret;
 		res=mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL);//设置所需要的传感器
 		if(res)return 1;
 		res=mpu_configure_fifo(INV_XYZ_GYRO|INV_XYZ_ACCEL);//设置FIFO
@@ -2984,7 +2986,10 @@ u8 mpu_dmp_init(void)
 		if(res)return 8;
 		res=mpu_set_dmp_state(1);	//使能DMP
 		if(res)return 9;
-	}else return 10;
+	}else{
+
+        return ret *-10;
+    }
 	return 0;
 }
 //得到dmp处理后的数据(注意,本函数需要比较多堆栈,局部变量有点多)
