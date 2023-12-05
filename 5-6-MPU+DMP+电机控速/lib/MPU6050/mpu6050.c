@@ -46,7 +46,8 @@ u8 MPU_Init(void)
 	MPU_IIC_Init();
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050
     Delay_ms(100);
-	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050
+	// 硬件会自动唤醒,不必手工唤醒.所以去除下面这一行. 参见: https://bbs.huaweicloud.com/forum/thread-89588-1-1.html
+	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050,
 	MPU_Set_Gyro_Fsr(3);					//陀螺仪传感器,±2000dps
 	MPU_Set_Accel_Fsr(0);					//加速度传感器,±2g
 	MPU_Set_Rate(50);						//设置采样率50Hz
