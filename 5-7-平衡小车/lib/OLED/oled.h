@@ -11,7 +11,7 @@ void OLED_OFF(void);	//让OLED休眠
 void OLED_ShowSNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);//显示一位数字
 int Num_Digit(int num);//计算五位数以内数字位数
 
-//以下常用(小黑)：
+
 void OLED_Init(void);
 void OLED_ShowNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);//在一行显示五位数以内数字
 //TextSize -- 字符大小(1:6*8 ; 2:8*16)
