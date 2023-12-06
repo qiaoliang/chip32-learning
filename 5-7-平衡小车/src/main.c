@@ -45,8 +45,6 @@ void OLED_ShowVelocity(int velocity)
 
 int main(void)
 {
-
-
 	Delay_init();         //延时函数初始化
 	OLED_Init();          //oled初始化
 	MPU_Init();		        //MPU6050初始化
@@ -55,10 +53,6 @@ int main(void)
 	Motor_Init();		  // 直流电机初始化
 	PWM_Init();
 	Encoder_Init();		  // 初始化电机编码器
-
-	/********************************************************
-					  到此所有硬件准备完毕
-	*********************************************************/
 
 	OLED_ShowStr(0,0,"Pitch: ",2);
 	OLED_ShowStr(0,2,"Roll: ",2);
