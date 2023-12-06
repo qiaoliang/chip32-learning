@@ -53,13 +53,9 @@ void EXTI15_10_IRQHandler(void)
 	{
 		measure = pitch;  // pitch测量值
 		calcu = zhongzhi; // roll理论值
-
-		// velocity = (Encoder_Get() + read_encoder3()) / 2; // 速度测量值
-		//velocity = Encoder_Left_Get();
-		//velocity = Encoder_Right_Get();
 		velocity = (Encoder_Left_Get() + Encoder_Right_Get()) / 2; // 取两个轮子速度，然后取的平均值
-																   // velocity = Encoder_Right_Get();
 		//  PID计算：直立环+速度环（完整版本还要加转向环）
+		//PWM = vertical_PID_value(measure, calcu);// + velocity_PID_value(velocity);
 		PWM = vertical_PID_value(measure, calcu) + velocity_PID_value(velocity);
 		PWM_Limited(&PWM); // PWM限幅
 

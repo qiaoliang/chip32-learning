@@ -15,7 +15,7 @@ extern float velocity_sum;	   // 速度积分
 int motor_flag;				   // 电机使能标志：1使能  0失能
 
 // 直立环PD参数:
-float Kp = -420, Ki = 0, Kd = -2000; // 调完速度环后精调
+float Kp = -520, Ki = 0, Kd = -2000; // 2500调完速度环后精调
 // float Kp=-420,Ki=0,Kd=-960; //乘0.6
 // float Kp=-700,Ki=0,Kd=-1600;
 // float Kp=0,Ki=0,Kd=0;
@@ -66,7 +66,7 @@ int main(void)
 			motor_flag = 0;			 // 关闭电机
 			velocity_sum = 0;		 // 速度积分清0
 			TIM_SetCounter(TIM3, 0);  // TIM3 用于 Encoder了.
-			// TIM_SetCounter(TIM2, 0); // TIM2 用于 PWM了.
+			TIM_SetCounter(TIM2, 0); // TIM2 用于 PWM了.
 		}
 		else
 			motor_flag = 1; // 开启电机
@@ -76,37 +76,3 @@ int main(void)
 		OLED_ShowVelocity(velocity);	   // 显示速度（非真实速度）
 	}
 }
-/////////////////////////////////////////////////////////////////////
-
-//第二种使用方式：用中断（陀螺仪的INT引脚会在读取到欧拉角后输出中断信号）
-//#include "delay.h"
-//#include "sys.h"
-//#include "OLED.h"
-//#include "mpu6050.h"
-//#include "inv_mpu.h"
-//#include "inv_mpu_dmp_motion_driver.h"
-//extern float pitch,roll,yaw; //欧拉角原始数据（在mpuexti.c定义）
-
-//int main(void)
-//{
-//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //2位抢占优先级，2位响应优先级
-//	delay_init();    //延时函数初始化
-//	OLED_Init();     //oled初始化
-//	MPU_Init();		   //MPU6050初始化
-//	DMP_Init();      //DMP初始化（DMP用来解算陀螺仪数据）
-//
-//
-///********************************************************
-//                  到此所有硬件准备完毕
-//*********************************************************/
-//
-//	OLED_ShowStr(0,0,"Pitch: ",2);
-//	OLED_ShowStr(0,2,"Roll: ",2);
-//	OLED_ShowStr(0,4,"Yaw: ",2);
-//
-//	//陀螺仪角度的读取在外部中断服务函数中进行，此处仅进行oled显示
-//	while(1)
-//	{
-//	  OLED_ShowAngle(pitch, roll, yaw); //oled显示角度
-//	}
-//}
