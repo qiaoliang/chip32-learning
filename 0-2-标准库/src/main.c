@@ -16,11 +16,17 @@ int main(void)
 
 	while (1)
 	{
-
-
 		GPIO_ResetBits(LEDPORT, LEDBUILDIN);
 		Delay_ms(500);
 		GPIO_SetBits(LEDPORT, LEDBUILDIN);
 		Delay_ms(500);
+		GPIO_ResetBits(LEDPORT, LEDBUILDIN);
+		Delay_ms(500);
+		GPIO_SetBits(LEDPORT, LEDBUILDIN);
+		Delay_ms(500);
+		GPIO_ResetBits(LEDPORT, LEDBUILDIN);
+		Delay_ms(1000);
+		GPIO_SetBits(LEDPORT, LEDBUILDIN);
+		Delay_ms(1000);
 	}
 }
