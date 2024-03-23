@@ -3,7 +3,7 @@
 
 void motor_init(void);
 void motor_gpio_init(void);
-void PWM_Xianfu(int max,int *PWM);
+void PWM_Amplitude_limit(int max, int *PWM);
 void SETPWM(int PWM);
 int read_encoder3(void);
 int read_encoder2(void);
