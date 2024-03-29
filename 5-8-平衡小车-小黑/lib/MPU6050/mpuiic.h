@@ -6,9 +6,9 @@
 #define MPU_SDA_OUT() {GPIOB->CRH&=0XFFFFFF0F;GPIOB->CRH|=(unsigned int)3<<4;}
 
 //IO操作函数
-#define MPU_IIC_SCL    PBout(8) 		//SCL
-#define MPU_IIC_SDA    PBout(9) 		//SDA
-#define MPU_READ_SDA   PBin(9) 		//输入SDA
+#define MPU_IIC_SCL    PBout(4)	//SCL
+#define MPU_IIC_SDA    PBout(3) 		//SDA
+#define MPU_READ_SDA   PBin(3) 		//输入SDA
 
 //IIC所有操作函数
 void MPU_IIC_Delay(void);				//MPU IIC延时函数

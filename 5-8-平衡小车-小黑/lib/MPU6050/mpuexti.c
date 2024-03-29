@@ -22,14 +22,14 @@ void MPU_exti_init()
 	NVIC_InitTypeDef NVIC_InitStructure;
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); // 使能复用功能时钟
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;	  // PA12
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;	  // PB5
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; // 设置成上拉输入
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource12); // 将PA12映射到中断线12
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource12); // 将PB5映射到中断线12
 	EXTI_InitStructure.EXTI_Line = EXTI_Line12;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; // 下降沿触发
