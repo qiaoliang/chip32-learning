@@ -1,72 +1,111 @@
-#include "stm32f10x.h"                  // Device header
-#include "PWM.h"
+#include "motor.h"
+#include "delay.h"
+#include "timer.h"
+#include "oled.h"
 
-/**
-  * 函    数：直流电机初始化
-  * 参    数：无
-  * 返 回 值：无
-  */
-void Motor_Init(void)
+void SETPWM(int PWM)
 {
-	/*开启时钟*/
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);		//开启GPIOA的时钟
-    // 左轮
-	GPIO_InitTypeDef GPIO_InitStructure_Left;
-	GPIO_InitStructure_Left.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure_Left.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
-	GPIO_InitStructure_Left.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure_Left); // 将PA4和PA5引脚初始化为推挽输出
-
-	// 右轮
-	GPIO_InitTypeDef GPIO_InitStructure_Right;
-	GPIO_InitStructure_Right.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure_Right.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;
-	GPIO_InitStructure_Right.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure_Right);
-
-	PWM_Init();													//初始化直流电机的底层PWM
-}
-void left_positive()
-{
-	GPIO_SetBits(GPIOA, GPIO_Pin_4);   // PA4置高电平
-	GPIO_ResetBits(GPIOA, GPIO_Pin_5); // PA5置低电平，设置方向为正转
-}
-void left_negative()
-{
-	GPIO_ResetBits(GPIOA, GPIO_Pin_4); // PA4置低电平
-	GPIO_SetBits(GPIOA, GPIO_Pin_5);   // PA5置高电平，设置方向为反转
-}
-void right_positive()
-{
-	GPIO_SetBits(GPIOB, GPIO_Pin_13);
-	GPIO_ResetBits(GPIOB, GPIO_Pin_14);
-}
-
-void right_negative()
-{
-	GPIO_ResetBits(GPIOB, GPIO_Pin_13);
-	GPIO_SetBits(GPIOB, GPIO_Pin_14);
-}
-/**
-  * 函    数：直流电机设置速度
-  * 参    数：Speed 要设置的速度，范围：-100~100
-  * 返 回 值：无
-  */
-void Motor_SetSpeed(int8_t Speed)
-{
-	if (Speed >= 0)							//如果设置正转的速度值
+	if(PWM>0) //正转
 	{
 		left_positive();
 		right_positive();
-		PWM_SetCompare2(Speed); // PWM设置为速度值
-		PWM_SetCompare3(Speed); // PWM设置为速度值
+		TIM_SetCompare1(TIM1,7200-PWM); //因为高级定时器的某些通道PWM输出反相
+		TIM_SetCompare4(TIM1,PWM);     
 	}
-	else									//否则，即设置反转的速度值
+	else      //反转
 	{
 		left_negative();
 		right_negative();
-		PWM_SetCompare2(-Speed);
-		PWM_SetCompare3(-Speed);
-	}
+		TIM_SetCompare1(TIM1,7200-(-PWM) ); 
+		TIM_SetCompare4(TIM1,-PWM );      
+	}	
 }
 
+
+void PWM_Xianfu(int max,int *PWM)
+{
+	if(*PWM>max)  *PWM = max;
+	if(*PWM<-max) *PWM =-max;
+}
+
+
+void left_positive(void) //左轮正转
+{
+	GPIO_SetBits(GPIOB,GPIO_Pin_14);
+	GPIO_ResetBits(GPIOB,GPIO_Pin_15);
+}
+
+void left_negative(void) //左轮反转
+{
+	GPIO_SetBits(GPIOB,GPIO_Pin_15);
+	GPIO_ResetBits(GPIOB,GPIO_Pin_14);
+}
+
+void right_positive(void) //右轮正转
+{
+	GPIO_SetBits(GPIOB,GPIO_Pin_12);
+	GPIO_ResetBits(GPIOB,GPIO_Pin_13);
+}
+
+void right_negative(void) //右轮反转
+{
+	GPIO_SetBits(GPIOB,GPIO_Pin_13);
+	GPIO_ResetBits(GPIOB,GPIO_Pin_12);
+}
+
+
+void motor_init()
+{
+	motor_gpio_init();         //gpio初始化
+	TIM1_PWM_Init(7200-1,1-1); //TIM1的pwm模式初始化
+	TIM3_encoder_init();       //TIM3的编码器模式初始化
+	TIM2_encoder_init();       //TIM2的编码器模式初始化
+}
+
+
+//PWM：   左PA8
+//        右PA11
+//正反转： 左PB14、15
+//        右PB13、12
+void motor_gpio_init()
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+ 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);  
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+	
+	//PWM口初始化：
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8|GPIO_Pin_11;  //TIM1_CH1  TIM1_CH4
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;        //复用推挽输出
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+	//正反转控制口初始化：
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13|GPIO_Pin_12; //右正反转
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       //推挽输出
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14|GPIO_Pin_15; //左正反转
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       //推挽输出
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+
+
+int read_encoder3(void)
+{
+	int speed;
+	speed = (short)TIM_GetCounter(TIM3); //1.采集编码器的计数值并保存
+	TIM_SetCounter(TIM3,0);              //2.将定时器的计数值清零
+	
+	return speed;
+}
+
+int read_encoder2(void)
+{
+	int speed;
+	speed = (short)TIM_GetCounter(TIM2); //1.采集编码器的计数值并保存
+	TIM_SetCounter(TIM2,0);              //2.将定时器的计数值清零
+	
+	return speed;
+}

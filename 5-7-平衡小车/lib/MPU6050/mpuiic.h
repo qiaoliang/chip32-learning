@@ -2,17 +2,14 @@
 #define __MPUIIC_H
 #include "sys.h"
 
-#define MPU_IIC_SCL_PIN  GPIO_Pin_10
-#define MPU_IIC_SDA_PIN GPIO_Pin_11
-#define MPU_IIC_GPIO_Port GPIOB
 //IO方向设置
-#define MPU_SDA_IN()  {GPIOB->CRH&=0XFFFF0FFF;GPIOB->CRH|=8<<12;}
-#define MPU_SDA_OUT() {GPIOB->CRH&=0XFFFF0FFF;GPIOB->CRH|=3<<12;}
+#define MPU_SDA_IN()  {GPIOB->CRH&=0XFFFFFF0F;GPIOB->CRH|=(unsigned int)8<<4;}
+#define MPU_SDA_OUT() {GPIOB->CRH&=0XFFFFFF0F;GPIOB->CRH|=(unsigned int)3<<4;}
 
 //IO操作函数
-#define MPU_IIC_SCL    PBout(10) 		//SCL
-#define MPU_IIC_SDA    PBout(11) 		//SDA
-#define MPU_READ_SDA   PBin(11) 		//输入SDA
+#define MPU_IIC_SCL    PBout(8) 		//SCL
+#define MPU_IIC_SDA    PBout(9) 		//SDA
+#define MPU_READ_SDA   PBin(9) 		//输入SDA
 
 //IIC所有操作函数
 void MPU_IIC_Delay(void);				//MPU IIC延时函数

@@ -25,18 +25,19 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "mpu6050.h"
-#include "Delay.h"
+#include "delay.h"
+#include "usart.h"
 
 
-#define MPU6050							//å®šä¹‰æˆ‘ä»¬ä½¿ç”¨çš„ä¼ æ„Ÿå™¨ä¸ºMPU6050
-#define MOTION_DRIVER_TARGET_MSP430		//å®šä¹‰é©±åŠ¨éƒ¨åˆ†,é‡‡ç”¨MSP430çš„é©±åŠ¨(ç§»æ¤åˆ°STM32F1)
+#define MPU6050							//¶¨ÒåÎÒÃÇÊ¹ÓÃµÄ´«¸ĞÆ÷ÎªMPU6050
+#define MOTION_DRIVER_TARGET_MSP430		//¶¨ÒåÇı¶¯²¿·Ö,²ÉÓÃMSP430µÄÇı¶¯(ÒÆÖ²µ½STM32F1)
 
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,
  *      unsigned char length, unsigned char const *data)
  * i2c_read(unsigned char slave_addr, unsigned char reg_addr,
  *      unsigned char length, unsigned char *data)
- * Delay_ms(unsigned long num_ms)
+ * delay_ms(unsigned long num_ms)
  * get_ms(unsigned long *count)
  * reg_int_cb(void (*cb)(void), unsigned char port, unsigned char pin)
  * labs(long x)
@@ -58,8 +59,8 @@
 //    return msp430_reg_int_cb(int_param->cb, int_param->pin, int_param->lp_exit,
 //        int_param->active_low);
 //}
-#define log_i 	printf	//æ‰“å°ä¿¡æ¯
-#define log_e  	printf	//æ‰“å°ä¿¡æ¯
+#define log_i 	printf	//´òÓ¡ĞÅÏ¢
+#define log_e  	printf	//´òÓ¡ĞÅÏ¢
 /* labs is already defined by TI's toolchain. */
 /* fabs is for doubles. fabsf is for floats. */
 #define fabs        fabsf
@@ -766,7 +767,7 @@ int mpu_init(void)
     data[0] = BIT_RESET;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
         return -1;
-    Delay_ms(100);
+    delay_ms(100);
 
     /* Wake up chip. */
     data[0] = 0x00;
@@ -1112,7 +1113,7 @@ int mpu_reset_fifo(void)
         data = BIT_FIFO_RST | BIT_DMP_RST;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        Delay_ms(50);
+        delay_ms(50);
         data = BIT_DMP_EN | BIT_FIFO_EN;
         if (st.chip_cfg.sensors & INV_XYZ_COMPASS)
             data |= BIT_AUX_IF_EN;
@@ -1137,7 +1138,7 @@ int mpu_reset_fifo(void)
             data = BIT_FIFO_EN | BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        Delay_ms(50);
+        delay_ms(50);
         if (st.chip_cfg.int_enable)
             data = BIT_DATA_RDY_EN;
         else
@@ -1661,7 +1662,7 @@ int mpu_set_sensors(unsigned char sensors)
 
     st.chip_cfg.sensors = sensors;
     st.chip_cfg.lp_accel_mode = 0;
-    Delay_ms(50);
+    delay_ms(50);
     return 0;
 }
 
@@ -1831,7 +1832,7 @@ int mpu_set_bypass(unsigned char bypass_on)
         tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
-        Delay_ms(3);
+        delay_ms(3);
         tmp = BIT_BYPASS_EN;
         if (st.chip_cfg.active_low_int)
             tmp |= BIT_ACTL;
@@ -1849,7 +1850,7 @@ int mpu_set_bypass(unsigned char bypass_on)
             tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
-        Delay_ms(3);
+        delay_ms(3);
         if (st.chip_cfg.active_low_int)
             tmp = BIT_ACTL;
         else
@@ -1996,7 +1997,7 @@ static int compass_self_test(void)
         goto AKM_restore;
 
     do {
-        Delay_ms(10);
+        delay_ms(10);
         if (i2c_read(st.chip_cfg.compass_addr, AKM_REG_ST1, 1, tmp))
             goto AKM_restore;
         if (tmp[0] & AKM_DATA_READY)
@@ -2040,7 +2041,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     data[1] = 0;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 2, data))
         return -1;
-    Delay_ms(200);
+    delay_ms(200);
     data[0] = 0;
     if (i2c_write(st.hw->addr, st.reg->int_enable, 1, data))
         return -1;
@@ -2055,7 +2056,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     data[0] = BIT_FIFO_RST | BIT_DMP_RST;
     if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, data))
         return -1;
-    Delay_ms(15);
+    delay_ms(15);
     data[0] = st.test->reg_lpf;
     if (i2c_write(st.hw->addr, st.reg->lpf, 1, data))
         return -1;
@@ -2076,7 +2077,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     if (i2c_write(st.hw->addr, st.reg->accel_cfg, 1, data))
         return -1;
     if (hw_test)
-        Delay_ms(200);
+        delay_ms(200);
 
     /* Fill FIFO for test.wait_ms milliseconds. */
     data[0] = BIT_FIFO_EN;
@@ -2086,7 +2087,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     data[0] = INV_XYZ_GYRO | INV_XYZ_ACCEL;
     if (i2c_write(st.hw->addr, st.reg->fifo_en, 1, data))
         return -1;
-    Delay_ms(test.wait_ms);
+    delay_ms(test.wait_ms);
     data[0] = 0;
     if (i2c_write(st.hw->addr, st.reg->fifo_en, 1, data))
         return -1;
@@ -2451,12 +2452,12 @@ int setup_compass(void)
     data[0] = AKM_POWER_DOWN;
     if (i2c_write(st.chip_cfg.compass_addr, AKM_REG_CNTL, 1, data))
         return -1;
-    Delay_ms(1);
+    delay_ms(1);
 
     data[0] = AKM_FUSE_ROM_ACCESS;
     if (i2c_write(st.chip_cfg.compass_addr, AKM_REG_CNTL, 1, data))
         return -1;
-    Delay_ms(1);
+    delay_ms(1);
 
     /* Get sensitivity adjustment data from fuse ROM. */
     if (i2c_read(st.chip_cfg.compass_addr, AKM_REG_ASAX, 3, data))
@@ -2468,7 +2469,7 @@ int setup_compass(void)
     data[0] = AKM_POWER_DOWN;
     if (i2c_write(st.chip_cfg.compass_addr, AKM_REG_CNTL, 1, data))
         return -1;
-    Delay_ms(1);
+    delay_ms(1);
 
     mpu_set_bypass(0);
 
@@ -2731,7 +2732,7 @@ int mpu_lp_motion_interrupt(unsigned short thresh, unsigned char time,
             goto lp_int_restore;
 
         /* Force hardware to "lock" current accel sample. */
-        Delay_ms(5);
+        delay_ms(5);
         data[0] = (st.chip_cfg.accel_fsr << 3) | BITS_HPF;
         if (i2c_write(st.hw->addr, st.reg->accel_cfg, 1, data))
             goto lp_int_restore;
@@ -2851,37 +2852,37 @@ lp_int_restore:
     return 0;
 }
 //////////////////////////////////////////////////////////////////////////////////
-//æ·»åŠ çš„ä»£ç éƒ¨åˆ†
-//////////////////////////////////////////////////////////////////////////////////
-//æœ¬ç¨‹åºåªä¾›å­¦ä¹ ä½¿ç”¨ï¼Œæœªç»ä½œè€…è®¸å¯ï¼Œä¸å¾—ç”¨äºå…¶å®ƒä»»ä½•ç”¨é€”
-//ALIENTEKç²¾è‹±STM32å¼€å‘æ¿V3
-//MPU6050 DMP é©±åŠ¨ä»£ç 
-//æ­£ç‚¹åŸå­@ALIENTEK
-//æŠ€æœ¯è®ºå›:www.openedv.com
-//åˆ›å»ºæ—¥æœŸ:2015/1/17
-//ç‰ˆæœ¬ï¼šV1.0
-//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
-//Copyright(C) å¹¿å·å¸‚æ˜Ÿç¿¼ç”µå­ç§‘æŠ€æœ‰é™å…¬å¸ 2009-2019
-//All rights reserved
-//////////////////////////////////////////////////////////////////////////////////
+//Ìí¼ÓµÄ´úÂë²¿·Ö 
+//////////////////////////////////////////////////////////////////////////////////	 
+//±¾³ÌĞòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßĞí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
+//ALIENTEK¾«Ó¢STM32¿ª·¢°åV3
+//MPU6050 DMP Çı¶¯´úÂë	   
+//ÕıµãÔ­×Ó@ALIENTEK
+//¼¼ÊõÂÛÌ³:www.openedv.com
+//´´½¨ÈÕÆÚ:2015/1/17
+//°æ±¾£ºV1.0
+//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
+//Copyright(C) ¹ãÖİÊĞĞÇÒíµç×Ó¿Æ¼¼ÓĞÏŞ¹«Ë¾ 2009-2019
+//All rights reserved									  
+////////////////////////////////////////////////////////////////////////////////// 
 
-//q30æ ¼å¼,longè½¬floatæ—¶çš„é™¤æ•°.
+//q30¸ñÊ½,long×ªfloatÊ±µÄ³ıÊı.
 #define q30  1073741824.0f
 
-//é™€èºä»ªæ–¹å‘è®¾ç½®
+//ÍÓÂİÒÇ·½ÏòÉèÖÃ
 static signed char gyro_orientation[9] = { 1, 0, 0,
                                            0, 1, 0,
                                            0, 0, 1};
-//MPU6050è‡ªæµ‹è¯•
-//è¿”å›å€¼:0,æ­£å¸¸
-//    å…¶ä»–,å¤±è´¥
+//MPU6050×Ô²âÊÔ
+//·µ»ØÖµ:0,Õı³£
+//    ÆäËû,Ê§°Ü
 u8 run_self_test(void)
 {
 	int result;
 	//char test_packet[4] = {0};
-	long gyro[3], accel[3];
+	long gyro[3], accel[3]; 
 	result = mpu_run_self_test(gyro, accel);
-	if (result == 0x3)
+	if (result == 0x3) 
 	{
 		/* Test passed. We can trust the gyro data here, so let's push it down
 		* to the DMP.
@@ -2893,14 +2894,14 @@ u8 run_self_test(void)
 		gyro[1] = (long)(gyro[1] * sens);
 		gyro[2] = (long)(gyro[2] * sens);
 		dmp_set_gyro_bias(gyro);
-
+		
 		/*********************************************************************************
-		å¦‚æœä¸éœ€è¦å–å¼€æœºè§’åº¦ä¸º0åº¦ï¼Œåˆ™æ³¨é‡Š mpu_get_accel_sens(&accel_sens) ä¸”åŠ ä¸Š accel_sens=0
+		Èç¹û²»ĞèÒªÈ¡¿ª»ú½Ç¶ÈÎª0¶È£¬Ôò×¢ÊÍ mpu_get_accel_sens(&accel_sens) ÇÒ¼ÓÉÏ accel_sens=0
 		wgn
 		**********************************************************************************/
 		//mpu_get_accel_sens(&accel_sens);
-		accel_sens=0;
-
+		accel_sens=0;      
+		
 		accel[0] *= accel_sens;
 		accel[1] *= accel_sens;
 		accel[2] *= accel_sens;
@@ -2908,11 +2909,11 @@ u8 run_self_test(void)
 		return 0;
 	}else return 1;
 }
-//é™€èºä»ªæ–¹å‘æ§åˆ¶
+//ÍÓÂİÒÇ·½Ïò¿ØÖÆ
 unsigned short inv_orientation_matrix_to_scalar(
     const signed char *mtx)
 {
-    unsigned short scalar;
+    unsigned short scalar; 
     /*
        XYZ  010_001_000 Identity Matrix
        XZY  001_010_000
@@ -2929,7 +2930,7 @@ unsigned short inv_orientation_matrix_to_scalar(
 
     return scalar;
 }
-//æ–¹å‘è½¬æ¢
+//·½Ïò×ª»»
 unsigned short inv_row_2_scale(const signed char *row)
 {
     unsigned short b;
@@ -2950,57 +2951,57 @@ unsigned short inv_row_2_scale(const signed char *row)
         b = 7;      // error
     return b;
 }
-//ç©ºå‡½æ•°,æœªç”¨åˆ°.
+//¿Õº¯Êı,Î´ÓÃµ½.
 void mget_ms(unsigned long *time)
 {
 
 }
-//mpu6050,dmpåˆå§‹åŒ–
-//è¿”å›å€¼:0,æ­£å¸¸
-//    å…¶ä»–,å¤±è´¥
+//mpu6050,dmp³õÊ¼»¯
+//·µ»ØÖµ:0,Õı³£
+//    ÆäËû,Ê§°Ü
 u8 mpu_dmp_init(void)
 {
 	u8 res=0;
-	MPU_IIC_Init(); 	//åˆå§‹åŒ–IICæ€»çº¿
-	if(mpu_init()==0)	//åˆå§‹åŒ–MPU6050
-	{
-		res=mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL);//è®¾ç½®æ‰€éœ€è¦çš„ä¼ æ„Ÿå™¨
-		if(res)return 1;
-		res=mpu_configure_fifo(INV_XYZ_GYRO|INV_XYZ_ACCEL);//è®¾ç½®FIFO
-		if(res)return 2;
-		res=mpu_set_sample_rate(DEFAULT_MPU_HZ);	//è®¾ç½®é‡‡æ ·ç‡
-		if(res)return 3;
-		res=dmp_load_motion_driver_firmware();		//åŠ è½½dmpå›ºä»¶
-		if(res)return 4;
-		res=dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation));//è®¾ç½®é™€èºä»ªæ–¹å‘
-		if(res)return 5;
-		res=dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT|DMP_FEATURE_TAP|	//è®¾ç½®dmpåŠŸèƒ½
+	MPU_IIC_Init(); 	//³õÊ¼»¯IIC×ÜÏß
+	if(mpu_init()==0)	//³õÊ¼»¯MPU6050
+	{	 
+		res=mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL);//ÉèÖÃËùĞèÒªµÄ´«¸ĞÆ÷
+		if(res)return 1; 
+		res=mpu_configure_fifo(INV_XYZ_GYRO|INV_XYZ_ACCEL);//ÉèÖÃFIFO
+		if(res)return 2; 
+		res=mpu_set_sample_rate(DEFAULT_MPU_HZ);	//ÉèÖÃ²ÉÑùÂÊ
+		if(res)return 3; 
+		res=dmp_load_motion_driver_firmware();		//¼ÓÔØdmp¹Ì¼ş
+		if(res)return 4; 
+		res=dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation));//ÉèÖÃÍÓÂİÒÇ·½Ïò
+		if(res)return 5; 
+		res=dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT|DMP_FEATURE_TAP|	//ÉèÖÃdmp¹¦ÄÜ
 		    DMP_FEATURE_ANDROID_ORIENT|DMP_FEATURE_SEND_RAW_ACCEL|DMP_FEATURE_SEND_CAL_GYRO|
 		    DMP_FEATURE_GYRO_CAL);
-		if(res)return 6;
-		res=dmp_set_fifo_rate(DEFAULT_MPU_HZ);	//è®¾ç½®DMPè¾“å‡ºé€Ÿç‡(æœ€å¤§ä¸è¶…è¿‡200Hz)
-		if(res)return 7;
-		res=run_self_test();		//è‡ªæ£€
-		if(res)return 8;
-		res=mpu_set_dmp_state(1);	//ä½¿èƒ½DMP
-		if(res)return 9;
+		if(res)return 6; 
+		res=dmp_set_fifo_rate(DEFAULT_MPU_HZ);	//ÉèÖÃDMPÊä³öËÙÂÊ(×î´ó²»³¬¹ı200Hz)
+		if(res)return 7;   
+		res=run_self_test();		//×Ô¼ì
+		if(res)return 8;    
+		res=mpu_set_dmp_state(1);	//Ê¹ÄÜDMP
+		if(res)return 9;     
 	}else return 10;
 	return 0;
 }
-//å¾—åˆ°dmpå¤„ç†åçš„æ•°æ®(æ³¨æ„,æœ¬å‡½æ•°éœ€è¦æ¯”è¾ƒå¤šå †æ ˆ,å±€éƒ¨å˜é‡æœ‰ç‚¹å¤š)
-//pitch:ä¿¯ä»°è§’ ç²¾åº¦:0.1Â°   èŒƒå›´:-90.0Â° <---> +90.0Â°
-//roll:æ¨ªæ»šè§’  ç²¾åº¦:0.1Â°   èŒƒå›´:-180.0Â°<---> +180.0Â°
-//yaw:èˆªå‘è§’   ç²¾åº¦:0.1Â°   èŒƒå›´:-180.0Â°<---> +180.0Â°
-//è¿”å›å€¼:0,æ­£å¸¸
-//    å…¶ä»–,å¤±è´¥
+//µÃµ½dmp´¦ÀíºóµÄÊı¾İ(×¢Òâ,±¾º¯ÊıĞèÒª±È½Ï¶à¶ÑÕ»,¾Ö²¿±äÁ¿ÓĞµã¶à)
+//pitch:¸©Ñö½Ç ¾«¶È:0.1¡ã   ·¶Î§:-90.0¡ã <---> +90.0¡ã
+//roll:ºá¹ö½Ç  ¾«¶È:0.1¡ã   ·¶Î§:-180.0¡ã<---> +180.0¡ã
+//yaw:º½Ïò½Ç   ¾«¶È:0.1¡ã   ·¶Î§:-180.0¡ã<---> +180.0¡ã
+//·µ»ØÖµ:0,Õı³£
+//    ÆäËû,Ê§°Ü
 u8 mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
 {
 	float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
 	unsigned long sensor_timestamp;
 	short gyro[3], accel[3], sensors;
 	unsigned char more;
-	long quat[4];
-	if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more))return 1;
+	long quat[4]; 
+	if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more))return 1;	 
 	/* Gyro and accel data are written to the FIFO by the DMP in chip frame and hardware units.
 	 * This behavior is convenient because it keeps the gyro and accel outputs of dmp_read_fifo and mpu_read_fifo consistent.
 	**/
@@ -3009,15 +3010,15 @@ u8 mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
 	if (sensors & INV_XYZ_ACCEL)
 	send_packet(PACKET_TYPE_ACCEL, accel); */
 	/* Unlike gyro and accel, quaternions are written to the FIFO in the body frame, q30.
-	 * The orientation is set by the scalar passed to dmp_set_orientation during initialization.
+	 * The orientation is set by the scalar passed to dmp_set_orientation during initialization. 
 	**/
-	if(sensors&INV_WXYZ_QUAT)
+	if(sensors&INV_WXYZ_QUAT) 
 	{
-		q0 = quat[0] / q30;	//q30æ ¼å¼è½¬æ¢ä¸ºæµ®ç‚¹æ•°
+		q0 = quat[0] / q30;	//q30¸ñÊ½×ª»»Îª¸¡µãÊı
 		q1 = quat[1] / q30;
 		q2 = quat[2] / q30;
-		q3 = quat[3] / q30;
-		//è®¡ç®—å¾—åˆ°ä¿¯ä»°è§’/æ¨ªæ»šè§’/èˆªå‘è§’
+		q3 = quat[3] / q30; 
+		//¼ÆËãµÃµ½¸©Ñö½Ç/ºá¹ö½Ç/º½Ïò½Ç
 		*pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3;	// pitch
 		*roll  = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)* 57.3;	// roll
 		*yaw   = atan2(2*(q1*q2 + q0*q3),q0*q0+q1*q1-q2*q2-q3*q3) * 57.3;	//yaw

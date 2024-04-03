@@ -22,7 +22,7 @@
 #define _INV_MPU_H_
 #include "stm32f10x.h"
 
-//å®šä¹‰è¾“å‡ºé€Ÿåº¦
+//¶¨ÒåÊä³öËÙ¶È
 #define DEFAULT_MPU_HZ  (100)		//100Hz
 
 #define INV_X_GYRO      (0x40)
@@ -32,7 +32,7 @@
 #define INV_XYZ_ACCEL   (0x08)
 #define INV_XYZ_COMPASS (0x01)
 
-//ç§»æ¤å®˜æ–¹MSP430 DMPé©±åŠ¨è¿‡æ¥
+//ÒÆÖ²¹Ù·½MSP430 DMPÇı¶¯¹ıÀ´
 struct int_param_s {
 //#if defined EMPL_TARGET_MSP430 || defined MOTION_DRIVER_TARGET_MSP430
     void (*cb)(void);
@@ -127,7 +127,7 @@ int mpu_reg_dump(void);
 int mpu_read_reg(unsigned char reg, unsigned char *data);
 int mpu_run_self_test(long *gyro, long *accel);
 int mpu_register_tap_cb(void (*func)(unsigned char, unsigned char));
-//è‡ªè¡Œæ·»åŠ çš„ä¸€äº›å‡½æ•°
+//×ÔĞĞÌí¼ÓµÄÒ»Ğ©º¯Êı
 void mget_ms(unsigned long *time);
 unsigned short inv_row_2_scale(const signed char *row);
 unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx);

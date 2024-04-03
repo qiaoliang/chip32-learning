@@ -1,43 +1,71 @@
 #include "oled.h"
 #include "codetab.h"//oled字符库
 
-//显示陀螺仪角度：
-void OLED_ShowAngle(float pitch, float roll, float yaw)
-{
-	int Pitch,Roll,Yaw;   //处理后的欧拉角
 
-	//对浮点数做处理，于是可以显示在oled上
-	Pitch=(int)(pitch*10);
+void OLED_ShowPWM(int PWM)
+{
+	if(PWM<0)
+	{
+		OLED_ShowStr(50,6,"-",2);		//显示负号
+		PWM=-PWM;
+	}
+	else OLED_ShowStr(50,6," ",2); //掩盖负号
+	OLED_Shownum1(58,6,PWM,2);	    //显示俯仰角
+
+}
+
+
+void OLED_ShowAngle(float roll,float yaw)
+{
+	int Roll,Yaw;
 	Roll=(int)(roll*10);
 	Yaw=(int)(yaw*10);
+	//对浮点数做处理，于是可以显示在lcd上
 
-	//1.显示俯仰角:
-	if(Pitch<0)
-	{
-		OLED_ShowStr(50,0,"-",2);	   //显示负号
-		Pitch=-Pitch;
-	}
-	else OLED_ShowStr(50,0," ",2); //掩盖负号
-	OLED_Shownum2(58,0,Pitch,2);
-
-	//2.显示翻滚角:
 	if(Roll<0)
 	{
-		OLED_ShowStr(50,2,"-",2);
+		OLED_ShowStr(0,2,"-",2);		//显示负号
 		Roll=-Roll;
 	}
-	else OLED_ShowStr(50,2," ",2);
-	OLED_Shownum3(58,2,Roll,2);
+	else OLED_ShowStr(0,2," ",2); //掩盖负号
+	OLED_Shownum3(8,2,Roll,2);	  //显示翻滚角
 
-	//3.显示方位角:
 	if(Yaw<0)
 	{
-		OLED_ShowStr(50,4,"-",2);
+		OLED_ShowStr(0,4,"-",2);
 		Yaw=-Yaw;
 	}
-	else OLED_ShowStr(50,4," ",2);
-	OLED_Shownum3(58,4,Yaw,2);
+	else OLED_ShowStr(0,4," ",2);
+	OLED_Shownum3(8,4,Yaw,2);	    //显示航向角
 }
+
+
+void OLED_Shownum1(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
+{
+	unsigned int ge,shi,bai,qian;
+	ge=num%10;
+	shi=(num%100)/10;
+	bai=(num%1000)/100;
+	qian=(num%10000)/1000;
+
+	if(TextSize==1)
+	{
+		OLED_ShowSNum(x,y,qian,TextSize);
+		OLED_ShowSNum(x+6,y,bai,TextSize);
+		OLED_ShowSNum(x+12,y,shi,TextSize);
+		OLED_ShowSNum(x+18,y,ge,TextSize);
+	}
+
+	if(TextSize==2)
+	{
+		OLED_ShowSNum(x,y,qian,TextSize);
+		OLED_ShowSNum(x+8,y,bai,TextSize);
+		OLED_ShowSNum(x+16,y,shi,TextSize);
+		OLED_ShowSNum(x+24,y,ge,TextSize);
+	}
+}
+
+
 
 void OLED_Shownum2(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
 {
@@ -92,6 +120,7 @@ void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned 
 }
 
 
+
 //功能：在一行中显示五位数字
 //wgn 2021.4.29
 void OLED_ShowNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
@@ -130,10 +159,10 @@ void OLED_ShowNum(unsigned char x, unsigned char y, unsigned int num, unsigned c
 
 			case 4:
 			{
-				OLED_ShowSNum(x,y,qian,TextSize);
-				OLED_ShowSNum(x+6,y,bai,TextSize);
-				OLED_ShowSNum(x+12,y,shi,TextSize);
-				OLED_ShowSNum(x+18,y,ge,TextSize);
+				OLED_ShowSNum(x+6,y,qian,TextSize);
+				OLED_ShowSNum(x+12,y,bai,TextSize);
+				OLED_ShowSNum(x+18,y,shi,TextSize);
+				OLED_ShowSNum(x+24,y,ge,TextSize);
 			}
 			break;
 
@@ -341,6 +370,32 @@ void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N)
 }
 
 
+//--------------------------------------------------------------
+// Prototype      : void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[]);
+// Calls          :
+// Parameters     : x0,y0 -- 起始点坐标(x0:0~127, y0:0~7); x1,y1 -- 起点对角线(结束点)的坐标(x1:1~128,y1:1~8)
+// Description    : 显示BMP位图
+//--------------------------------------------------------------
+void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[])
+{
+	unsigned int j=0;
+	unsigned char x,y;
+
+  if(y1%8==0)
+		y = y1/8;
+  else
+		y = y1/8 + 1;
+	for(y=y0;y<y1;y++)
+	{
+		OLED_SetPos(x0,y);
+    for(x=x0;x<x1;x++)
+		{
+			OLED_Data(BMP[j++]);
+		}
+	}
+}
+
+
 void OLED_Clear(void)
 {
 	OLED_Fill(0);
@@ -403,19 +458,18 @@ void OLED_Init(void)
 	IIC_Init(); //GPIO初始化
 
 	//OLED相关配置
-	Delay_ms(100);
-
+	delay_ms(100);
 	OLED_Command(0xAE); //display off
 	OLED_Command(0x20);	//Set Memory Addressing Mode
 	OLED_Command(0x10);	//00,Horizontal Addressing Mode;01,Vertical Addressing Mode;10,Page Addressing Mode (RESET);11,Invalid
 	OLED_Command(0xb0);	//Set Page Start Address for Page Addressing Mode,0-7
-	OLED_Command(0xc8);	//Set COM Output Scan Direction
+	OLED_Command(0xc8);	//Set COM Output Scan Direction              (c8正、c0反)
+	OLED_Command(0xa1); //--set segment re-map 0 to 127              (a1正、a0反)
 	OLED_Command(0x00); //---set low column address
 	OLED_Command(0x10); //---set high column address
 	OLED_Command(0x40); //--set start line address
 	OLED_Command(0x81); //--set contrast control register
 	OLED_Command(0xff); //亮度调节 0x00~0xff
-	OLED_Command(0xa1); //--set segment re-map 0 to 127
 	OLED_Command(0xa6); //--set normal display
 	OLED_Command(0xa8); //--set multiplex ratio(1 to 64)
 	OLED_Command(0x3F); //
@@ -433,8 +487,15 @@ void OLED_Init(void)
 	OLED_Command(0x8d); //--set DC-DC enable
 	OLED_Command(0x14); //
 	OLED_Command(0xaf); //--turn on oled panel
-	OLED_Fill(0x00);//清屏（全用0填充）
+	OLED_Fill(0x00);    //清屏（也就是全用0填充）
 
+	OLED_ShowStr(6,1,"By: MasterQiao",2);
+	delay_ms(1000);
+	OLED_ShowStr(6,3,"QQ: 1686321091",2);
+	delay_ms(1000);
+	OLED_ShowStr(10,5,"  2024/4/1",2);
+	delay_ms(1000);
+	OLED_Fill(0x00);
 	OLED_ShowStr(0,0,"OLED OK!",1);
 }
 
@@ -489,3 +550,4 @@ int OLED_Data(unsigned char Data)
    IIC_Stop();
 	 return 0;
 }
+

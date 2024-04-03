@@ -1,14 +1,10 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
-#include "mpuiic.h"
+#include "mpuiic.h"   
 #include "mpuexti.h"
-
+ 
 //MPU6050 AD0控制脚
-#define MPU_AD0_GPIO_Port          GPIOA
-#define MPU_AD0_GPIO_CLK            RCC_APB2Periph_GPIOA
-#define MPU_AD0                     15
-#define MPU_AD0_Pin                 GPIO_Pin_15
-#define MPU_AD0_CTRL                PAout(MPU_AD0) // 控制AD0电平,从而控制MPU地址
+#define MPU_AD0_CTRL			PAout(15)	//控制AD0电平,从而控制MPU地址
 
 //#define MPU_ACCEL_OFFS_REG		0X06	//accel_offs寄存器,可读取版本号,寄存器手册未提到
 //#define MPU_PROD_ID_REG			0X0C	//prod id寄存器,在寄存器手册未提到
@@ -73,24 +69,24 @@
 #define MPU_MDETECT_CTRL_REG	0X69	//运动检测控制寄存器
 #define MPU_USER_CTRL_REG		0X6A	//用户控制寄存器
 #define MPU_PWR_MGMT1_REG		0X6B	//电源管理寄存器1
-#define MPU_PWR_MGMT2_REG		0X6C	//电源管理寄存器2
+#define MPU_PWR_MGMT2_REG		0X6C	//电源管理寄存器2 
 #define MPU_FIFO_CNTH_REG		0X72	//FIFO计数寄存器高八位
 #define MPU_FIFO_CNTL_REG		0X73	//FIFO计数寄存器低八位
 #define MPU_FIFO_RW_REG			0X74	//FIFO读写寄存器
 #define MPU_DEVICE_ID_REG		0X75	//器件ID寄存器
-
-// 如果AD0脚(MPU_AD0_Pin脚)接地,IIC地址为0X68(不包含最低位).
-// 如果接V3.3,则IIC地址为0X69(不包含最低位).
+ 
+//如果AD0脚(9脚)接地,IIC地址为0X68(不包含最低位).
+//如果接V3.3,则IIC地址为0X69(不包含最低位).
 #define MPU_ADDR				0X68
 
 
-////因为模块AD0默认接GND,所以转为读写地址后,为0XD1和0XD0(如果接VCC,则为0XD3和0XD2)
+////因为模块AD0默认接GND,所以转为读写地址后,为0XD1和0XD0(如果接VCC,则为0XD3和0XD2)  
 //#define MPU_READ    0XD1
 //#define MPU_WRITE   0XD0
 
 u8 MPU_Init(void); 								//初始化MPU6050
 u8 MPU_Write_Len(u8 addr,u8 reg,u8 len,u8 *buf);//IIC连续写
-u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf); //IIC连续读
+u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf); //IIC连续读 
 u8 MPU_Write_Byte(u8 reg,u8 data);				//IIC写一个字节
 u8 MPU_Read_Byte(u8 reg);						//IIC读一个字节
 
