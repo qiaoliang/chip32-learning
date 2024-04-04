@@ -1,4 +1,4 @@
-#include "OLED_I2C.h"
+#include "OLED_IIC.h"
 
 /*引脚初始化*/
 void OLED_I2C_Init(void)

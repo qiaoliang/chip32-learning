@@ -4,6 +4,8 @@
 #define OLED_I2C_SCL_PIN GPIO_Pin_8
 #define OLED_I2C_PORTx GPIOB
 #define OLED_I2C_RCC_PORT RCC_APB2Periph_GPIOB
+
+/*引脚操作*/
 #define OLED_W_SCL(x) GPIO_WriteBit(OLED_I2C_PORTx, OLED_I2C_SCL_PIN, (BitAction)(x))
 #define OLED_W_SDA(x) GPIO_WriteBit(OLED_I2C_PORTx, OLED_I2C_SDA_PIN, (BitAction)(x))
 
