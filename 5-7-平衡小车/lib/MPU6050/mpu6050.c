@@ -20,10 +20,10 @@ void DMP_Init(void)
 	{
 		OLED_ShowNum(60,5,i++,1);
 		OLED_ShowNum(42,6,dmp_error,1);
-		delay_ms(200);
+		Delay_ms(200);
 	}
 	OLED_ShowStr(0,4,"DMP OK! __WGN",1);
-	delay_ms(1000);
+	Delay_ms(1000);
 	OLED_Clear(); //清屏
 }
 
@@ -46,7 +46,7 @@ u8 MPU_Init(void)
 
 	MPU_IIC_Init();//初始化IIC总线
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050
-    delay_ms(100);
+    Delay_ms(100);
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050
 	MPU_Set_Gyro_Fsr(3);					//陀螺仪传感器,±2000dps
 	MPU_Set_Accel_Fsr(0);					//加速度传感器,±2g
@@ -69,7 +69,7 @@ u8 MPU_Init(void)
 	}
 
 	OLED_ShowStr(0,2,"MPU6050 OK!",1);
-	delay_ms(50);
+	Delay_ms(50);
 	return 0;
 }
 //设置MPU6050陀螺仪传感器满量程范围

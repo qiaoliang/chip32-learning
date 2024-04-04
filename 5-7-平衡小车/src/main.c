@@ -27,7 +27,7 @@ float VKp=+190,VKi=0.95;
 int main()
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //2位抢占优先级，2位响应优先级
-	delay_init();               										//延时函数初始化
+	//Delay_init();               										//延时函数初始化
 	OLED_Init();                									  //oled初始化
   motor_init();               										//电机的 IO  pwm  编码器 初始化
 	MPU_Init();		              										//MPU6050初始化

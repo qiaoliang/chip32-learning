@@ -458,7 +458,7 @@ void OLED_Init(void)
 	IIC_Init(); //GPIO初始化
 
 	//OLED相关配置
-	delay_ms(100);
+	Delay_ms(100);
 	OLED_Command(0xAE); //display off
 	OLED_Command(0x20);	//Set Memory Addressing Mode
 	OLED_Command(0x10);	//00,Horizontal Addressing Mode;01,Vertical Addressing Mode;10,Page Addressing Mode (RESET);11,Invalid
@@ -490,11 +490,11 @@ void OLED_Init(void)
 	OLED_Fill(0x00);    //清屏（也就是全用0填充）
 
 	OLED_ShowStr(6,1,"By: MasterQiao",2);
-	delay_ms(1000);
+	Delay_ms(1000);
 	OLED_ShowStr(6,3,"QQ: 1686321091",2);
-	delay_ms(1000);
+	Delay_ms(1000);
 	OLED_ShowStr(10,5,"  2024/4/1",2);
-	delay_ms(1000);
+	Delay_ms(1000);
 	OLED_Fill(0x00);
 	OLED_ShowStr(0,0,"OLED OK!",1);
 }
