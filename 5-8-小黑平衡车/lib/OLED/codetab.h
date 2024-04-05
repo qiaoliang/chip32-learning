@@ -13,13 +13,13 @@
 * Project  : OLED
 * Processor: STC89C52
 * Compiler : Keil C51 Compiler
-* 
+*
 * Author : Aaron Lee
 * Version: 1.00
 * Date   : 2014.3.24
 * Email  : hello14blog@gmail.com
 * Modification: none
-* 
+*
 * Description:
 * 1. 128*64点整OLED模块功能演示程序的字表，仅适用heltec.taobao.com所售产品;
 * 2. 字表由打包资料中的“取字软件”计算得出;
@@ -145,7 +145,7 @@ const unsigned char F6x8[][6] =
 	0x14, 0x14, 0x14, 0x14, 0x14, 0x14,// horiz lines
 };
 /****************************************8*16的点阵************************************/
-const unsigned char F8X16[]=	  
+const unsigned char F8X16[]=
 {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,// 0
   0x00,0x00,0x00,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x33,0x30,0x00,0x00,0x00,//! 1

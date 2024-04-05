@@ -7,9 +7,9 @@ void PWM_Xianfu(int max,int *PWM);
 void SETPWM(int PWM);
 int read_encoder3(void);
 int read_encoder2(void);
-void motor_enable(float pitch); //鏍规嵁瑙掑害鍒ゆ柇鏄惁浣胯兘 or 鍏抽棴鐢垫満
-void left_positive(void);       //宸﹁疆姝ｄ紶
-void left_negative(void);       //宸﹁疆鍙嶈浆
-void right_positive(void);      //鍙宠疆姝ｈ浆
-void right_negative(void);      //鍙宠疆鍙嶈浆
+void motor_enable(float pitch);
+void left_positive(void);
+void left_negative(void);
+void right_positive(void);
+void right_negative(void);
 #endif
