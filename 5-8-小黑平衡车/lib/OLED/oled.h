@@ -15,7 +15,7 @@ void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned ch
 //以下常用
 void OLED_Init(void);
 //TextSize -- 字符大小(1:6*8 ; 2:8*16)
-void OLED_ShowNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);//在一行显示五位数以内数字
+void OLED_ShowNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);//在一行显示五位数以内数字  
 void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize);//显示字符串
 void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N);//显示汉字
 void OLED_Clear(void);//清屏
@@ -26,16 +26,4 @@ void OLED_ShowPWM(int PWM);
 void OLED_Shownum1(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);
 void OLED_Shownum2(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);
 void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);
-void OLED_check();
-void OLED_ShowSmallChar(uint8_t x, uint8_t y, char Char);
-void OLED_ShowLargeChar(uint8_t x, uint8_t y, char Char);
-/**
- * @brief  OLED显示数字（十六进制，正数）
- * @param  Line 起始行位置，范围：1~4
- * @param  Column 起始列位置，范围：1~16
- * @param  Number 要显示的数字，范围：0~0xFFFFFFFF
- * @param  Length 要显示数字的长度，范围：1~8
- * @retval 无
- */
-void OLED_ShowHexNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length);
 #endif
