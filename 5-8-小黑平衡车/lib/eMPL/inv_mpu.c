@@ -766,18 +766,18 @@ int mpu_init(void)
     /* Reset device. */
     data[0] = BIT_RESET;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
-        return -1;
+        return 10; //修改返回
     delay_ms(100);
 
     /* Wake up chip. */
     data[0] = 0x00;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
-        return -1;
+        return 11; // 修改返回
 
 #if defined MPU6050
     /* Check product revision. */
     if (i2c_read(st.hw->addr, st.reg->accel_offs, 6, data))
-        return -1;
+        return 12; // 修改返回
     rev = ((data[5] & 0x01) << 2) | ((data[3] & 0x01) << 1) |
         (data[1] & 0x01);
 
@@ -789,16 +789,16 @@ int mpu_init(void)
             st.chip_cfg.accel_half = 0;
         else {
             log_e("Unsupported software product rev %d.\n", rev);
-            return -1;
+            return 13; // 修改返回
         }
     } else {
         if (i2c_read(st.hw->addr, st.reg->prod_id, 1, data))
-            return -1;
+            return 14; // 修改返回
         rev = data[0] & 0x0F;
         if (!rev) {
             log_e("Product ID read as 0 indicates device is either "
                 "incompatible or an MPU3050.\n");
-            return -1;
+            return 15; // 修改返回
         } else if (rev == 4) {
             log_i("Half sensitivity part found.\n");
             st.chip_cfg.accel_half = 1;
@@ -848,15 +848,15 @@ int mpu_init(void)
     st.chip_cfg.dmp_sample_rate = 0;
 
     if (mpu_set_gyro_fsr(2000))
-        return -1;
+        return 16; // 修改返回
     if (mpu_set_accel_fsr(2))
-        return -1;
+        return 17; // 修改返回
     if (mpu_set_lpf(42))
-        return -1;
+        return 18; // 修改返回
     if (mpu_set_sample_rate(50))
-        return -1;
+        return 19; // 修改返回
     if (mpu_configure_fifo(0))
-        return -1;
+        return 20; // 修改返回
 
 //    if (int_param)
 //        reg_int_cb(int_param);
@@ -867,8 +867,9 @@ int mpu_init(void)
         return -1;
 #else
     /* Already disabled by setup_compass. */
-    if (mpu_set_bypass(0))
-        return -1;
+    int bypass_state = mpu_set_bypass(0);
+    if (bypass_state)
+        return bypass_state; // 修改返回
 #endif
 
     mpu_set_sensors(0);
@@ -1828,10 +1829,10 @@ int mpu_set_bypass(unsigned char bypass_on)
 
     if (bypass_on) {
         if (i2c_read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return -1;
+            return 21; //
         tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return -1;
+            return 22;
         delay_ms(3);
         tmp = BIT_BYPASS_EN;
         if (st.chip_cfg.active_low_int)
@@ -1839,17 +1840,17 @@ int mpu_set_bypass(unsigned char bypass_on)
         if (st.chip_cfg.latched_int)
             tmp |= BIT_LATCH_EN | BIT_ANY_RD_CLR;
         if (i2c_write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
-            return -1;
+            return 23;
     } else {
         /* Enable I2C master mode if compass is being used. */
         if (i2c_read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return -1;
+            return 24;
         if (st.chip_cfg.sensors & INV_XYZ_COMPASS)
             tmp |= BIT_AUX_IF_EN;
         else
             tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return -1;
+            return 25;
         delay_ms(3);
         if (st.chip_cfg.active_low_int)
             tmp = BIT_ACTL;
@@ -1857,8 +1858,9 @@ int mpu_set_bypass(unsigned char bypass_on)
             tmp = 0;
         if (st.chip_cfg.latched_int)
             tmp |= BIT_LATCH_EN | BIT_ANY_RD_CLR;
+        delay_ms(3);
         if (i2c_write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
-            return -1;
+            return 26;
     }
     st.chip_cfg.bypass_mode = bypass_on;
     return 0;
@@ -2852,19 +2854,19 @@ lp_int_restore:
     return 0;
 }
 //////////////////////////////////////////////////////////////////////////////////
-//添加的代码部分 
-//////////////////////////////////////////////////////////////////////////////////	 
+//添加的代码部分
+//////////////////////////////////////////////////////////////////////////////////
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK精英STM32开发板V3
-//MPU6050 DMP 驱动代码	   
+//MPU6050 DMP 驱动代码
 //正点原子@ALIENTEK
 //技术论坛:www.openedv.com
 //创建日期:2015/1/17
 //版本：V1.0
 //版权所有，盗版必究。
 //Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 
+//All rights reserved
+//////////////////////////////////////////////////////////////////////////////////
 
 //q30格式,long转float时的除数.
 #define q30  1073741824.0f
@@ -2880,9 +2882,9 @@ u8 run_self_test(void)
 {
 	int result;
 	//char test_packet[4] = {0};
-	long gyro[3], accel[3]; 
+	long gyro[3], accel[3];
 	result = mpu_run_self_test(gyro, accel);
-	if (result == 0x3) 
+	if (result == 0x3)
 	{
 		/* Test passed. We can trust the gyro data here, so let's push it down
 		* to the DMP.
@@ -2894,14 +2896,14 @@ u8 run_self_test(void)
 		gyro[1] = (long)(gyro[1] * sens);
 		gyro[2] = (long)(gyro[2] * sens);
 		dmp_set_gyro_bias(gyro);
-		
+
 		/*********************************************************************************
 		如果不需要取开机角度为0度，则注释 mpu_get_accel_sens(&accel_sens) 且加上 accel_sens=0
 		wgn
 		**********************************************************************************/
 		//mpu_get_accel_sens(&accel_sens);
-		accel_sens=0;      
-		
+		accel_sens=0;
+
 		accel[0] *= accel_sens;
 		accel[1] *= accel_sens;
 		accel[2] *= accel_sens;
@@ -2913,7 +2915,7 @@ u8 run_self_test(void)
 unsigned short inv_orientation_matrix_to_scalar(
     const signed char *mtx)
 {
-    unsigned short scalar; 
+    unsigned short scalar;
     /*
        XYZ  010_001_000 Identity Matrix
        XZY  001_010_000
@@ -2963,30 +2965,32 @@ u8 mpu_dmp_init(void)
 {
 	u8 res=0;
 	MPU_IIC_Init(); 	//初始化IIC总线
-	if(mpu_init()==0)	//初始化MPU6050
-	{	 
+    int mpu_init_res = mpu_init();
+	if(mpu_init_res==0)	//初始化MPU6050
+	{
 		res=mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL);//设置所需要的传感器
-		if(res)return 1; 
+		if(res)return 1;
 		res=mpu_configure_fifo(INV_XYZ_GYRO|INV_XYZ_ACCEL);//设置FIFO
-		if(res)return 2; 
+		if(res)return 2;
 		res=mpu_set_sample_rate(DEFAULT_MPU_HZ);	//设置采样率
-		if(res)return 3; 
+		if(res)return 3;
 		res=dmp_load_motion_driver_firmware();		//加载dmp固件
-		if(res)return 4; 
+		if(res)return 4;
 		res=dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation));//设置陀螺仪方向
-		if(res)return 5; 
+		if(res)return 5;
 		res=dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT|DMP_FEATURE_TAP|	//设置dmp功能
 		    DMP_FEATURE_ANDROID_ORIENT|DMP_FEATURE_SEND_RAW_ACCEL|DMP_FEATURE_SEND_CAL_GYRO|
 		    DMP_FEATURE_GYRO_CAL);
-		if(res)return 6; 
+		if(res)return 6;
 		res=dmp_set_fifo_rate(DEFAULT_MPU_HZ);	//设置DMP输出速率(最大不超过200Hz)
-		if(res)return 7;   
+		if(res)return 7;
 		res=run_self_test();		//自检
-		if(res)return 8;    
+		if(res)return 8;
 		res=mpu_set_dmp_state(1);	//使能DMP
-		if(res)return 9;     
-	}else return 10;
-	return 0;
+		if(res)return 9;
+	}else
+        return mpu_init_res;
+    return 0;
 }
 //得到dmp处理后的数据(注意,本函数需要比较多堆栈,局部变量有点多)
 //pitch:俯仰角 精度:0.1°   范围:-90.0° <---> +90.0°
@@ -3000,8 +3004,8 @@ u8 mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
 	unsigned long sensor_timestamp;
 	short gyro[3], accel[3], sensors;
 	unsigned char more;
-	long quat[4]; 
-	if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more))return 1;	 
+	long quat[4];
+	if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more))return 1;
 	/* Gyro and accel data are written to the FIFO by the DMP in chip frame and hardware units.
 	 * This behavior is convenient because it keeps the gyro and accel outputs of dmp_read_fifo and mpu_read_fifo consistent.
 	**/
@@ -3010,14 +3014,14 @@ u8 mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
 	if (sensors & INV_XYZ_ACCEL)
 	send_packet(PACKET_TYPE_ACCEL, accel); */
 	/* Unlike gyro and accel, quaternions are written to the FIFO in the body frame, q30.
-	 * The orientation is set by the scalar passed to dmp_set_orientation during initialization. 
+	 * The orientation is set by the scalar passed to dmp_set_orientation during initialization.
 	**/
-	if(sensors&INV_WXYZ_QUAT) 
+	if(sensors&INV_WXYZ_QUAT)
 	{
 		q0 = quat[0] / q30;	//q30格式转换为浮点数
 		q1 = quat[1] / q30;
 		q2 = quat[2] / q30;
-		q3 = quat[3] / q30; 
+		q3 = quat[3] / q30;
 		//计算得到俯仰角/横滚角/航向角
 		*pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3;	// pitch
 		*roll  = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)* 57.3;	// roll
