@@ -37,32 +37,6 @@ void OLED_ShowAngle(float roll, float yaw)
 		OLED_ShowStr(0, 4, " ", 2);
 	OLED_Shownum3(8, 4, Yaw, 2); // 显示航向角
 }
-
-void OLED_Shownum1(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
-{
-	unsigned int ge, shi, bai, qian;
-	ge = num % 10;
-	shi = (num % 100) / 10;
-	bai = (num % 1000) / 100;
-	qian = (num % 10000) / 1000;
-
-	if (TextSize == 1)
-	{
-		OLED_ShowDigit(x, y, qian, TextSize);
-		OLED_ShowDigit(x + 6, y, bai, TextSize);
-		OLED_ShowDigit(x + 12, y, shi, TextSize);
-		OLED_ShowDigit(x + 18, y, ge, TextSize);
-	}
-
-	if (TextSize == 2)
-	{
-		OLED_ShowDigit(x, y, qian, TextSize);
-		OLED_ShowDigit(x + 8, y, bai, TextSize);
-		OLED_ShowDigit(x + 16, y, shi, TextSize);
-		OLED_ShowDigit(x + 24, y, ge, TextSize);
-	}
-}
-
 void OLED_Shownum2(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
 {
 	unsigned int ge, shi, bai;
