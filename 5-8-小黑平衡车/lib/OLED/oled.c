@@ -10,7 +10,7 @@ void OLED_ShowPWM(int PWM)
 	}
 	else
 		OLED_ShowStr(50, 6, " ", 2); // 掩盖负号
-	OLED_Shownum1(58, 6, PWM, 2);	 // 显示俯仰角
+	OLED_ShowNumber(58, 6, PWM, 2);	 // 显示俯仰角
 }
 
 void OLED_ShowAngle(float roll, float yaw)
@@ -48,18 +48,18 @@ void OLED_Shownum1(unsigned char x, unsigned char y, unsigned int num, unsigned 
 
 	if (TextSize == 1)
 	{
-		OLED_ShowSNum(x, y, qian, TextSize);
-		OLED_ShowSNum(x + 6, y, bai, TextSize);
-		OLED_ShowSNum(x + 12, y, shi, TextSize);
-		OLED_ShowSNum(x + 18, y, ge, TextSize);
+		OLED_ShowDigit(x, y, qian, TextSize);
+		OLED_ShowDigit(x + 6, y, bai, TextSize);
+		OLED_ShowDigit(x + 12, y, shi, TextSize);
+		OLED_ShowDigit(x + 18, y, ge, TextSize);
 	}
 
 	if (TextSize == 2)
 	{
-		OLED_ShowSNum(x, y, qian, TextSize);
-		OLED_ShowSNum(x + 8, y, bai, TextSize);
-		OLED_ShowSNum(x + 16, y, shi, TextSize);
-		OLED_ShowSNum(x + 24, y, ge, TextSize);
+		OLED_ShowDigit(x, y, qian, TextSize);
+		OLED_ShowDigit(x + 8, y, bai, TextSize);
+		OLED_ShowDigit(x + 16, y, shi, TextSize);
+		OLED_ShowDigit(x + 24, y, ge, TextSize);
 	}
 }
 
@@ -72,18 +72,18 @@ void OLED_Shownum2(unsigned char x, unsigned char y, unsigned int num, unsigned 
 
 	if (TextSize == 1)
 	{
-		OLED_ShowSNum(x, y, bai, TextSize);
-		OLED_ShowSNum(x + 6, y, shi, TextSize);
+		OLED_ShowDigit(x, y, bai, TextSize);
+		OLED_ShowDigit(x + 6, y, shi, TextSize);
 		OLED_ShowStr(x + 12, y, ".", TextSize);
-		OLED_ShowSNum(x + 18, y, ge, TextSize);
+		OLED_ShowDigit(x + 18, y, ge, TextSize);
 	}
 
 	if (TextSize == 2)
 	{
-		OLED_ShowSNum(x, y, bai, TextSize);
-		OLED_ShowSNum(x + 8, y, shi, TextSize);
+		OLED_ShowDigit(x, y, bai, TextSize);
+		OLED_ShowDigit(x + 8, y, shi, TextSize);
 		OLED_ShowStr(x + 16, y, ".", TextSize);
-		OLED_ShowSNum(x + 24, y, ge, TextSize);
+		OLED_ShowDigit(x + 24, y, ge, TextSize);
 	}
 }
 
@@ -97,125 +97,23 @@ void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned 
 
 	if (TextSize == 1)
 	{
-		OLED_ShowSNum(x, y, qian, TextSize);
-		OLED_ShowSNum(x + 6, y, bai, TextSize);
-		OLED_ShowSNum(x + 12, y, shi, TextSize);
+		OLED_ShowDigit(x, y, qian, TextSize);
+		OLED_ShowDigit(x + 6, y, bai, TextSize);
+		OLED_ShowDigit(x + 12, y, shi, TextSize);
 		OLED_ShowStr(x + 18, y, ".", TextSize);
-		OLED_ShowSNum(x + 24, y, ge, TextSize);
+		OLED_ShowDigit(x + 24, y, ge, TextSize);
 	}
 
 	if (TextSize == 2)
 	{
-		OLED_ShowSNum(x, y, qian, TextSize);
-		OLED_ShowSNum(x + 8, y, bai, TextSize);
-		OLED_ShowSNum(x + 16, y, shi, TextSize);
+		OLED_ShowDigit(x, y, qian, TextSize);
+		OLED_ShowDigit(x + 8, y, bai, TextSize);
+		OLED_ShowDigit(x + 16, y, shi, TextSize);
 		OLED_ShowStr(x + 24, y, ".", TextSize);
-		OLED_ShowSNum(x + 32, y, ge, TextSize);
+		OLED_ShowDigit(x + 32, y, ge, TextSize);
 	}
 }
 
-// 功能：在一行中显示五位数字
-void OLED_ShowNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
-{
-	unsigned int ge, shi, bai, qian, wan;
-	ge = num % 10;
-	shi = (num % 100) / 10;
-	bai = (num % 1000) / 100;
-	qian = (num % 10000) / 1000;
-	wan = num / 10000;
-
-	if (TextSize == 1)
-	{
-		switch (Num_Digit(num))
-		{
-		case 1:
-		{
-			OLED_ShowSNum(x, y, ge, TextSize);
-		}
-		break;
-
-		case 2:
-		{
-			OLED_ShowSNum(x, y, shi, TextSize);
-			OLED_ShowSNum(x + 6, y, ge, TextSize);
-		}
-		break;
-
-		case 3:
-		{
-			OLED_ShowSNum(x, y, bai, TextSize);
-			OLED_ShowSNum(x + 6, y, shi, TextSize);
-			OLED_ShowSNum(x + 12, y, ge, TextSize);
-		}
-		break;
-
-		case 4:
-		{
-			OLED_ShowSNum(x + 6, y, qian, TextSize);
-			OLED_ShowSNum(x + 12, y, bai, TextSize);
-			OLED_ShowSNum(x + 18, y, shi, TextSize);
-			OLED_ShowSNum(x + 24, y, ge, TextSize);
-		}
-		break;
-
-		case 5:
-		{
-			OLED_ShowSNum(x, y, wan, TextSize);
-			OLED_ShowSNum(x + 6, y, qian, TextSize);
-			OLED_ShowSNum(x + 12, y, bai, TextSize);
-			OLED_ShowSNum(x + 18, y, shi, TextSize);
-			OLED_ShowSNum(x + 24, y, ge, TextSize);
-		}
-		break;
-		}
-	}
-
-	if (TextSize == 2)
-	{
-		switch (Num_Digit(num))
-		{
-		case 1:
-		{
-			OLED_ShowSNum(x, y, ge, TextSize);
-		}
-		break;
-
-		case 2:
-		{
-			OLED_ShowSNum(x, y, shi, TextSize);
-			OLED_ShowSNum(x + 8, y, ge, TextSize);
-		}
-		break;
-
-		case 3:
-		{
-			OLED_ShowSNum(x, y, bai, TextSize);
-			OLED_ShowSNum(x + 8, y, shi, TextSize);
-			OLED_ShowSNum(x + 16, y, ge, TextSize);
-		}
-		break;
-
-		case 4:
-		{
-			OLED_ShowSNum(x, y, qian, TextSize);
-			OLED_ShowSNum(x + 8, y, bai, TextSize);
-			OLED_ShowSNum(x + 16, y, shi, TextSize);
-			OLED_ShowSNum(x + 24, y, ge, TextSize);
-		}
-		break;
-
-		case 5:
-		{
-			OLED_ShowSNum(x, y, wan, TextSize);
-			OLED_ShowSNum(x + 8, y, qian, TextSize);
-			OLED_ShowSNum(x + 16, y, bai, TextSize);
-			OLED_ShowSNum(x + 24, y, shi, TextSize);
-			OLED_ShowSNum(x + 32, y, ge, TextSize);
-		}
-		break;
-		}
-	}
-}
 
 void OLED_ShowSNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
 {
