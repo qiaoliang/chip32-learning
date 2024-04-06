@@ -33,6 +33,12 @@
 *
 *************************************************************************************/
 
+#define LARGE_FONT (unsigned char)2
+#define SMALL_FONT (unsigned char)1
+#define SMALL_FONT_WIDTH 6
+#define SCREEN_WIDTH_FOR_SMALL_FONT 126
+#define LARGE_FONT_WIDTH 8
+#define SCREEN_WIDTH_FOR_LARGE_FONT 120
 /***************************16*16的点阵字体取模方式：共阴——列行式——逆向输出*********/
 unsigned char F16x16[] =
 {

@@ -115,7 +115,6 @@ void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned 
 }
 
 // 功能：在一行中显示五位数字
-// wgn 2021.4.29
 void OLED_ShowNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
 {
 	unsigned int ge, shi, bai, qian, wan;
@@ -268,6 +267,101 @@ void OLED_ShowSNum(unsigned char x, unsigned char y, unsigned int num, unsigned 
 	}
 	break;
 	}
+}
+/**
+ * @brief 使用小字号,在指定位置(x,y) 显示指定的一串小于10位数的数字(正数或负数).如果超过屏幕宽度,则换行.
+ *
+ * @param x 指定的列
+ * @param y 指定的行
+ * @param num 被显示的数字
+ * @param TextSize 字号, SMALL_FONT:小号, LARGE_FONT:大号
+ */
+void OLED_ShowNumber(unsigned char x, unsigned char y, int num, unsigned char TextSize)
+{
+	int font_width = 0, screen_size = 0;
+	if (TextSize == SMALL_FONT)
+	{
+		font_width = SMALL_FONT_WIDTH;
+		screen_size = SCREEN_WIDTH_FOR_SMALL_FONT;
+	}
+	else if (TextSize == LARGE_FONT)
+	{
+		font_width = LARGE_FONT_WIDTH;
+		screen_size = SCREEN_WIDTH_FOR_LARGE_FONT;
+	}
+	else
+	{
+		return;
+	}
+	if (num == 0)
+	{
+		OLED_ShowDigit(x, y, num, TextSize);
+		return;
+	}
+	if (num < 0)
+	{
+		OLED_ShowStr(x, y, "-", TextSize);
+		x = x + font_width;
+		num = -num;
+	}
+	unsigned int singleDigital[5], i = 0; // 存储十位的数字
+	while (num > 0)
+	{
+		if (i >= 5) // 截断数字,溢出保护
+			break;
+		singleDigital[i++] = num % 10;
+		num = num / 10;
+	}
+	for (int j = i - 1; j >= 0; j--)
+	{
+		if (x > screen_size)
+		{
+			x = 0;
+			y = y + 1;
+		}
+		OLED_ShowDigit(x, y, singleDigital[j], TextSize);
+		x = x + font_width;
+	}
+}
+/**
+ * @brief 使用指定字号来在指定位置(x,y) 显示指定的数字
+ *
+ * @param x 所在点阵的列
+ * @param y 所在点阵的行
+ * @param digit 所显示的单一数字,指从0到9的任何一个阿拉伯数字
+ * @param TextSize 指定字号
+ * @return int 0 if success, -1 if fail.
+ */
+int OLED_ShowDigit(unsigned int x, unsigned int y, unsigned int digit, unsigned char TextSize)
+{
+	if (digit > 9 || digit < 0)
+		return -1;
+	unsigned char c = 0, i = 0;
+	c = 48 + digit;
+	switch (TextSize)
+	{
+	case SMALL_FONT:
+		if (x > SCREEN_WIDTH_FOR_SMALL_FONT)
+			return -1;
+		c = c - 32;
+		OLED_SetPos(x, y);
+		for (i = 0; i < SMALL_FONT_WIDTH; i++)
+			OLED_Data(F6x8[c][i]);
+		break;
+	case LARGE_FONT:
+		if (x > SCREEN_WIDTH_FOR_LARGE_FONT)
+			return -1;
+		c = c - 32;
+		// 显示字符的上半部分
+		OLED_SetPos(x, y);
+		for (i = 0; i < LARGE_FONT_WIDTH; i++)
+			OLED_Data(F8X16[c * 16 + i]);
+		// 显示字符的下半部分
+		OLED_SetPos(x, y + 1);
+		for (i = 0; i < LARGE_FONT_WIDTH; i++)
+			OLED_Data(F8X16[c * 16 + i + LARGE_FONT_WIDTH]);
+	}
+	return 0;
 }
 
 // 功能：计算五位数以内数字位数

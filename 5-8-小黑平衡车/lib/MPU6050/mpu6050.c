@@ -20,8 +20,8 @@ void DMP_Init(void)
 	OLED_ShowStr(0, 6, "Error:", 1);	// 错误原因
 	while (dmp_error = mpu_dmp_init())	// DMP初始化（此处报错，不用管）
 	{
-		OLED_ShowNum(60, 5, i++, 1);
-		OLED_ShowNum(42, 6, dmp_error, 1);
+		OLED_ShowNumber(60, 5, i++, 1);
+		OLED_ShowNumber(42, 6, dmp_error, 1);
 		delay_ms(200);
 	}
 	OLED_ShowStr(0, 4, "DMP OK! __WGN", 1);
