@@ -8,7 +8,6 @@ void OLED_Fill(unsigned char fill_Data);            // 全屏填充，可实现�
 void OLED_SetPos(unsigned char x, unsigned char y); // 设置起始点坐标
 void OLED_ON(void);
 void OLED_OFF(void);                                                                                            // 让OLED休眠
-void OLED_ShowSNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);                 // 显示一位数字
 int Num_Digit(int num);                                                                                         // 计算五位数以内数字位数
 void OLED_DrawBMP(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1, unsigned char BMP[]); // 显示BMP图
 
@@ -22,8 +21,6 @@ void OLED_Clear(void);                                                          
 // 显示角度
 void OLED_ShowAngle(float pitch, float yaw);
 void OLED_ShowPWM(int PWM);
-
-void OLED_Shownum2(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);
 void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);
 
 int OLED_ShowDigit(unsigned int x, unsigned int y, unsigned int digit, unsigned char TextSize);

@@ -25,8 +25,8 @@ void OLED_ShowAngle(float roll, float yaw)
 		Roll = -Roll;
 	}
 	else
-		OLED_ShowStr(0, 2, " ", 2); // 掩盖负号
-	OLED_Shownum3(8, 2, Roll, 2);	// 显示翻滚角
+		OLED_ShowStr(0, 2, " ", 2); // 显示正号
+	OLED_Shownum3(SMALL_FONT_WIDTH+2, 2, Roll, 2);	// 显示翻滚角
 
 	if (Yaw < 0)
 	{
@@ -35,30 +35,7 @@ void OLED_ShowAngle(float roll, float yaw)
 	}
 	else
 		OLED_ShowStr(0, 4, " ", 2);
-	OLED_Shownum3(8, 4, Yaw, 2); // 显示航向角
-}
-void OLED_Shownum2(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
-{
-	unsigned int ge, shi, bai;
-	ge = num % 10;
-	shi = (num % 100) / 10;
-	bai = (num % 1000) / 100;
-
-	if (TextSize == 1)
-	{
-		OLED_ShowDigit(x, y, bai, TextSize);
-		OLED_ShowDigit(x + 6, y, shi, TextSize);
-		OLED_ShowStr(x + 12, y, ".", TextSize);
-		OLED_ShowDigit(x + 18, y, ge, TextSize);
-	}
-
-	if (TextSize == 2)
-	{
-		OLED_ShowDigit(x, y, bai, TextSize);
-		OLED_ShowDigit(x + 8, y, shi, TextSize);
-		OLED_ShowStr(x + 16, y, ".", TextSize);
-		OLED_ShowDigit(x + 24, y, ge, TextSize);
-	}
+	OLED_Shownum3(SMALL_FONT_WIDTH+2, 4, Yaw, 2); // 显示航向角
 }
 
 void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
@@ -88,58 +65,6 @@ void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned 
 	}
 }
 
-
-void OLED_ShowSNum(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
-{
-	unsigned char c = 0, i = 0, j = 0;
-	unsigned char ch[2];
-	ch[0] = 48 + num;
-	ch[1] = '\0';
-	switch (TextSize)
-	{
-	case 1:
-	{
-		while (ch[j] != '\0')
-		{
-			c = ch[j] - 32;
-			if (x > 126)
-			{
-				x = 0;
-				y++;
-			}
-			OLED_SetPos(x, y);
-			for (i = 0; i < 6; i++)
-				OLED_Data(F6x8[c][i]);
-
-			x += 6;
-			j++;
-		}
-	}
-	break;
-	case 2:
-	{
-		while (ch[j] != '\0')
-		{
-			c = ch[j] - 32;
-			if (x > 120)
-			{
-				x = 0;
-				y++;
-			}
-			OLED_SetPos(x, y);
-			for (i = 0; i < 8; i++)
-				OLED_Data(F8X16[c * 16 + i]);
-			OLED_SetPos(x, y + 1);
-			for (i = 0; i < 8; i++)
-				OLED_Data(F8X16[c * 16 + i + 8]);
-
-			x += 8;
-			j++;
-		}
-	}
-	break;
-	}
-}
 /**
  * @brief 使用小字号,在指定位置(x,y) 显示指定的一串小于10位数的数字(正数或负数).如果超过屏幕宽度,则换行.
  *
@@ -198,8 +123,8 @@ void OLED_ShowNumber(unsigned char x, unsigned char y, int num, unsigned char Te
 /**
  * @brief 使用指定字号来在指定位置(x,y) 显示指定的数字
  *
- * @param x 所在点阵的列
- * @param y 所在点阵的行
+ * @param x 所在点阵的列位置
+ * @param y 所在点阵的行位置
  * @param digit 所显示的单一数字,指从0到9的任何一个阿拉伯数字
  * @param TextSize 指定字号
  * @return int 0 if success, -1 if fail.
