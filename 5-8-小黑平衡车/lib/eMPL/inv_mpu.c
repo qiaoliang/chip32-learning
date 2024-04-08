@@ -778,18 +778,18 @@ int mpu_init(void)
     /* Reset device. */
     data[0] = BIT_RESET;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
-        return 10; // 修改返回
+        return 11; // 修改返回
     delay_ms(100);
 
     /* Wake up chip. */
     data[0] = 0x00;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
-        return 11; // 修改返回
+        return 12; // 修改返回
 
 #if defined MPU6050
     /* Check product revision. */
     if (i2c_read(st.hw->addr, st.reg->accel_offs, 6, data))
-        return 12; // 修改返回
+        return 13; // 修改返回
     rev = ((data[5] & 0x01) << 2) | ((data[3] & 0x01) << 1) |
           (data[1] & 0x01);
 
@@ -803,19 +803,19 @@ int mpu_init(void)
         else
         {
             log_e("Unsupported software product rev %d.\n", rev);
-            return 13; // 修改返回
+            return 14; // 修改返回
         }
     }
     else
     {
         if (i2c_read(st.hw->addr, st.reg->prod_id, 1, data))
-            return 14; // 修改返回
+            return 15; // 修改返回
         rev = data[0] & 0x0F;
         if (!rev)
         {
             log_e("Product ID read as 0 indicates device is either "
                   "incompatible or an MPU3050.\n");
-            return 15; // 修改返回
+            return 16; // 修改返回
         }
         else if (rev == 4)
         {
@@ -869,15 +869,15 @@ int mpu_init(void)
     st.chip_cfg.dmp_sample_rate = 0;
 
     if (mpu_set_gyro_fsr(2000))
-        return 16; // 修改返回
-    if (mpu_set_accel_fsr(2))
         return 17; // 修改返回
-    if (mpu_set_lpf(42))
+    if (mpu_set_accel_fsr(2))
         return 18; // 修改返回
-    if (mpu_set_sample_rate(50))
+    if (mpu_set_lpf(42))
         return 19; // 修改返回
-    if (mpu_configure_fifo(0))
+    if (mpu_set_sample_rate(50))
         return 20; // 修改返回
+    if (mpu_configure_fifo(0))
+        return 21; // 修改返回
 
         //    if (int_param)
         //        reg_int_cb(int_param);
@@ -1889,10 +1889,10 @@ int mpu_set_bypass(unsigned char bypass_on)
     if (bypass_on)
     {
         if (i2c_read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return 21; //
+            return 22; //
         tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return 22;
+            return 23;
         delay_ms(3);
         tmp = BIT_BYPASS_EN;
         if (st.chip_cfg.active_low_int)
@@ -1900,19 +1900,19 @@ int mpu_set_bypass(unsigned char bypass_on)
         if (st.chip_cfg.latched_int)
             tmp |= BIT_LATCH_EN | BIT_ANY_RD_CLR;
         if (i2c_write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
-            return 23;
+            return 24;
     }
     else
     {
         /* Enable I2C master mode if compass is being used. */
         if (i2c_read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return 24;
+            return 25;
         if (st.chip_cfg.sensors & INV_XYZ_COMPASS)
             tmp |= BIT_AUX_IF_EN;
         else
             tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
-            return 25;
+            return 26;
         delay_ms(3);
         if (st.chip_cfg.active_low_int)
             tmp = BIT_ACTL;
@@ -1922,7 +1922,7 @@ int mpu_set_bypass(unsigned char bypass_on)
             tmp |= BIT_LATCH_EN | BIT_ANY_RD_CLR;
         delay_ms(3);
         if (i2c_write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
-            return 26;
+            return 27;
     }
     st.chip_cfg.bypass_mode = bypass_on;
     return 0;

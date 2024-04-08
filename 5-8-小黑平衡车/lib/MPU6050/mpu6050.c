@@ -24,7 +24,7 @@ void DMP_Init(void)
 		OLED_ShowNumber(42, 6, dmp_error, 1);
 		delay_ms(200);
 	}
-	OLED_ShowStr(0, 4, "DMP OK! __WGN", 1);
+	OLED_ShowStr(0, 4, "DMP OK! MasterQ", 1);
 	delay_ms(1000);
 	OLED_Clear(); // 清屏
 }

@@ -1,6 +1,10 @@
 #include "oled.h"
 #include "codetab.h" //oled字符库
-
+/**
+ * @brief 显示PWM值
+ *
+ * @param PWM
+ */
 void OLED_ShowPWM(int PWM)
 {
 	if (PWM < 0)
@@ -10,9 +14,15 @@ void OLED_ShowPWM(int PWM)
 	}
 	else
 		OLED_ShowStr(50, 6, " ", 2); // 掩盖负号
-	OLED_ShowNumber(58, 6, PWM, 2);	 // 显示俯仰角
+	OLED_ShowNumber(58, 6, PWM, 2);	 // 显示PWM
 }
 
+/**
+ * @brief 显示角度
+ *
+ * @param roll  翻滚角
+ * @param yaw  显示航向角
+ */
 void OLED_ShowAngle(float roll, float yaw)
 {
 	int Roll, Yaw;
@@ -25,8 +35,8 @@ void OLED_ShowAngle(float roll, float yaw)
 		Roll = -Roll;
 	}
 	else
-		OLED_ShowStr(0, 2, " ", 2); // 显示正号
-	OLED_Shownum3(SMALL_FONT_WIDTH+2, 2, Roll, 2);	// 显示翻滚角
+		OLED_ShowStr(0, 2, " ", 2);					 // 显示正号
+	OLED_Shownum3( 8, 2, Roll, 2); // 显示翻滚角
 
 	if (Yaw < 0)
 	{
@@ -35,34 +45,34 @@ void OLED_ShowAngle(float roll, float yaw)
 	}
 	else
 		OLED_ShowStr(0, 4, " ", 2);
-	OLED_Shownum3(SMALL_FONT_WIDTH+2, 4, Yaw, 2); // 显示航向角
+	OLED_Shownum3(8, 4, Yaw, 2); // 显示航向角
 }
 
+/**
+ * @brief  显示三位整数和一位小数
+ *
+ * @param x 显示点的x坐标
+ * @param y 显示点的y坐标
+ * @param num 被显示的数字
+ * @param TextSize 字号, SMALL_FONT:小号, LARGE_FONT:大号
+ */
 void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize)
 {
+
 	unsigned int ge, shi, bai, qian;
 	ge = num % 10;
 	shi = (num % 100) / 10;
 	bai = (num % 1000) / 100;
 	qian = (num % 10000) / 1000;
+	unsigned int font_size, font_width;
+	font_size = (TextSize == SMALL_FONT) ? SMALL_FONT : LARGE_FONT;
+	font_width = (TextSize == SMALL_FONT) ? SMALL_FONT_WIDTH : LARGE_FONT_WIDTH;
 
-	if (TextSize == 1)
-	{
-		OLED_ShowDigit(x, y, qian, TextSize);
-		OLED_ShowDigit(x + 6, y, bai, TextSize);
-		OLED_ShowDigit(x + 12, y, shi, TextSize);
-		OLED_ShowStr(x + 18, y, ".", TextSize);
-		OLED_ShowDigit(x + 24, y, ge, TextSize);
-	}
-
-	if (TextSize == 2)
-	{
-		OLED_ShowDigit(x, y, qian, TextSize);
-		OLED_ShowDigit(x + 8, y, bai, TextSize);
-		OLED_ShowDigit(x + 16, y, shi, TextSize);
-		OLED_ShowStr(x + 24, y, ".", TextSize);
-		OLED_ShowDigit(x + 32, y, ge, TextSize);
-	}
+	OLED_ShowDigit(x, y, qian, font_size);
+	OLED_ShowDigit(x + font_width * 1, y, bai, font_size);
+	OLED_ShowDigit(x + font_width * 2, y, shi, font_size);
+	OLED_ShowStr(x + font_width * 3, y, ".", font_size);
+	OLED_ShowDigit(x + font_width * 4, y, ge, font_size);
 }
 
 /**
@@ -160,27 +170,6 @@ int OLED_ShowDigit(unsigned int x, unsigned int y, unsigned int digit, unsigned 
 	}
 	return 0;
 }
-
-// 功能：计算五位数以内数字位数
-// wgn 2021.4.29
-int Num_Digit(int num)
-{
-	if (num >= 0 && num < 100000)
-	{
-		if (num < 10)
-			return 1;
-		if (num < 100)
-			return 2;
-		if (num < 1000)
-			return 3;
-		if (num < 10000)
-			return 4;
-		if (num < 1000000)
-			return 5;
-	}
-	return 0;
-}
-
 //--------------------------------------------------------------
 // Prototype      : void OLED_ShowChar(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize)
 // Calls          :
@@ -257,13 +246,15 @@ void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N)
 		adder += 1;
 	}
 }
-
-//--------------------------------------------------------------
-// Prototype      : void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char BMP[]);
-// Calls          :
-// Parameters     : x0,y0 -- 起始点坐标(x0:0~127, y0:0~7); x1,y1 -- 起点对角线(结束点)的坐标(x1:1~128,y1:1~8)
-// Description    : 显示BMP位图
-//--------------------------------------------------------------
+/**
+ * @brief 显示BMP位图
+ *
+ * @param x0 起始点x坐标 ( x0:0~127)
+ * @param y0 起始点y坐标 ( y0:0~7)
+ * @param x1 起点对角线(结束点)的x坐标 ( x1:1~128)
+ * @param y1 起点对角线(结束点)的y坐标 ( y1:1~8)
+ * @param BMP BMP位图数据
+ */
 void OLED_DrawBMP(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1, unsigned char BMP[])
 {
 	unsigned int j = 0;
@@ -309,26 +300,20 @@ void OLED_Fill(unsigned char fill_Data) // 全屏填充
 		}
 	}
 }
-
-//--------------------------------------------------------------
-// Prototype      : void OLED_ON(void)
-// Calls          :
-// Parameters     : none
-// Description    : 将OLED从休眠中唤醒
-//--------------------------------------------------------------
+/**
+ * @brief 将OLED从休眠中唤醒
+ *
+ */
 void OLED_ON(void)
 {
 	OLED_Command(0X8D); // 设置电荷泵
 	OLED_Command(0X14); // 开启电荷泵
 	OLED_Command(0XAF); // OLED唤醒
 }
-
-//--------------------------------------------------------------
-// Prototype      : void OLED_OFF(void)
-// Calls          :
-// Parameters     : none
-// Description    : 让OLED休眠 -- 休眠模式下,OLED功耗不到10uA
-//--------------------------------------------------------------
+/**
+ * @brief 让OLED休眠 -- 休眠模式下,OLED功耗不到10uA
+ *
+ */
 void OLED_OFF(void)
 {
 	OLED_Command(0X8D); // 设置电荷泵
@@ -372,11 +357,11 @@ void OLED_Init(void)
 	OLED_Command(0xaf); //--turn on oled panel
 	OLED_Fill(0x00);	// 清屏（也就是全用0填充）
 
-	OLED_ShowStr(6, 1, "By: WangGuanNan", 2);
+	OLED_ShowStr(6, 1, "By: MasterQiao", 2);
 	delay_ms(1000);
-	OLED_ShowStr(6, 3, "QQ: 1501451224", 2);
+	OLED_ShowStr(6, 3, "QQ: 1686321091", 2);
 	delay_ms(1000);
-	OLED_ShowStr(10, 5, "  2021/7/11", 2);
+	OLED_ShowStr(10, 5, "  2024.03.25", 2);
 	delay_ms(1000);
 	OLED_Fill(0x00);
 	OLED_ShowStr(0, 0, "OLED OK!", 1);
