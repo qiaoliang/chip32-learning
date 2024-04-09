@@ -9,7 +9,7 @@
 #include "motor.h"
 
 extern float pitch, roll, yaw; // 欧拉角测量值
-float zhongzhi = 0;			   // roll理论值（小车平衡时的角度）
+float balance_angle = 0;			   // 小车平衡时的角度
 extern int velocity;		   // 速度测量值（编码器脉冲数，非真实速度）
 extern float velocity_sum;	   // 速度积分
 int motor_flag;				   // 电机使能标志：1使能  0失能
@@ -51,7 +51,7 @@ int main()
 			motor_flag = 1; // 开启电机
 
 		// 【2】状态显示：
-		OLED_ShowAngle(roll, yaw); // 显示欧拉角
+		OLED_ShowAngle(pitch, roll, yaw); // 显示欧拉角
 		OLED_ShowPWM(velocity);	   // 显示速度（非真实速度）
 	}
 }

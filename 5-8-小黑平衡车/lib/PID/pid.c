@@ -29,14 +29,14 @@ int velocity_PID_value(int velocity)
 	float a = 0.3;												 // 滤波系数（反映滤波程度）
 	filt_velocity = a * velocity + (1 - a) * last_filt_velocity; // 一阶速度滤波
 	velocity_sum += filt_velocity;								 // 速度的累加
-	I_xianfu(3000);												 // 累加限幅
+	I_Limiting(3000);											 // 累加限幅
 	last_filt_velocity = filt_velocity;							 // 此次速度记录为“上次速度”
 
 	return VKp * filt_velocity + VKi * velocity_sum;
 }
 
 // I限幅：
-void I_xianfu(int max)
+void I_Limiting(int max)
 {
 	if (velocity_sum > max)
 		velocity_sum = max;

@@ -23,29 +23,39 @@ void OLED_ShowPWM(int PWM)
  * @param roll  翻滚角
  * @param yaw  显示航向角
  */
-void OLED_ShowAngle(float roll, float yaw)
+void OLED_ShowAngle(float pitch, float roll, float yaw)
 {
-	int Roll, Yaw;
+
+	int Pitch, Roll, Yaw;
+	Pitch = (int)(pitch * 10);
 	Roll = (int)(roll * 10);
 	Yaw = (int)(yaw * 10);
 	// 对浮点数做处理，于是可以显示在lcd上
-	if (Roll < 0)
+	if (Pitch < 0)
 	{
-		OLED_ShowStr(0, 2, "Roll: -", LARGE_FONT); // 显示负号
+		OLED_ShowStr(0, 0, "Pitch: -", LARGE_FONT); // 显示负号
 		Roll = -Roll;
 	}
 	else
-		OLED_ShowStr(0, 2, "Roll: ", LARGE_FONT);					 // 显示正号
-	OLED_Shownum3( 56, 2, Roll, LARGE_FONT); // 显示翻滚角
+		OLED_ShowStr(0, 0, "Pitch:  ", LARGE_FONT); // 显示正号
+	OLED_Shownum3(64, 2, Pitch, LARGE_FONT);	   // 显示 Pitch 俯仰角
+	if (Roll < 0)
+	{
+		OLED_ShowStr(0, 2, "Roll:  -", LARGE_FONT); // 显示负号
+		Roll = -Roll;
+	}
+	else
+		OLED_ShowStr(0, 2, "Roll:  ", LARGE_FONT);					 // 显示正号
+	OLED_Shownum3( 64, 2, Roll, LARGE_FONT); // 显示Roll 翻滚角
 
 	if (Yaw < 0)
 	{
-		OLED_ShowStr(0, 4, "Yaw:  -", LARGE_FONT);
+		OLED_ShowStr(0, 4, "Yaw:   -", LARGE_FONT);
 		Yaw = -Yaw;
 	}
 	else
-		OLED_ShowStr(0, 4, "Yaw:   ", LARGE_FONT);
-	OLED_Shownum3(56, 4, Yaw, LARGE_FONT); // 显示航向角
+		OLED_ShowStr(0, 4, "Yaw:    ", LARGE_FONT);
+	OLED_Shownum3(64, 4, Yaw, LARGE_FONT); // 显示Yaw航向角
 }
 
 /**
