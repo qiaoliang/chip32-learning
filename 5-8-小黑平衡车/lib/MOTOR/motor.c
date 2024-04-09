@@ -43,14 +43,14 @@ void left_negative(void) //左轮反转
 
 void right_positive(void) //右轮正转
 {
-	GPIO_SetBits(GPIOB,GPIO_Pin_12);
-	GPIO_ResetBits(GPIOB,GPIO_Pin_13);
+	GPIO_SetBits(GPIOB, GPIO_Pin_13);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
 }
 
 void right_negative(void) //右轮反转
 {
-	GPIO_SetBits(GPIOB,GPIO_Pin_13);
-	GPIO_ResetBits(GPIOB,GPIO_Pin_12);
+	GPIO_SetBits(GPIOB, GPIO_Pin_12);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_13);
 }
 
 
