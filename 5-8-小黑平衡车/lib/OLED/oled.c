@@ -9,12 +9,12 @@ void OLED_ShowPWM(int PWM)
 {
 	if (PWM < 0)
 	{
-		OLED_ShowStr(50, 6, "-", 2); // 显示负号
+		OLED_ShowStr(10, 6, "PWM: -", LARGE_FONT); // 显示负号
 		PWM = -PWM;
 	}
 	else
-		OLED_ShowStr(50, 6, " ", 2); // 掩盖负号
-	OLED_ShowNumber(58, 6, PWM, 2);	 // 显示PWM
+		OLED_ShowStr(10, 6, "PWM: ", LARGE_FONT); // 掩盖负号
+	OLED_ShowNumber(58, 6, PWM, LARGE_FONT);	 // 显示PWM
 }
 
 /**
@@ -31,21 +31,21 @@ void OLED_ShowAngle(float roll, float yaw)
 	// 对浮点数做处理，于是可以显示在lcd上
 	if (Roll < 0)
 	{
-		OLED_ShowStr(0, 2, "-", 2); // 显示负号
+		OLED_ShowStr(0, 2, "Roll: -", LARGE_FONT); // 显示负号
 		Roll = -Roll;
 	}
 	else
-		OLED_ShowStr(0, 2, " ", 2);					 // 显示正号
-	OLED_Shownum3( 8, 2, Roll, 2); // 显示翻滚角
+		OLED_ShowStr(0, 2, "Roll: ", LARGE_FONT);					 // 显示正号
+	OLED_Shownum3( 56, 2, Roll, LARGE_FONT); // 显示翻滚角
 
 	if (Yaw < 0)
 	{
-		OLED_ShowStr(0, 4, "-", 2);
+		OLED_ShowStr(0, 4, "Yaw:  -", LARGE_FONT);
 		Yaw = -Yaw;
 	}
 	else
-		OLED_ShowStr(0, 4, " ", 2);
-	OLED_Shownum3(8, 4, Yaw, 2); // 显示航向角
+		OLED_ShowStr(0, 4, "Yaw:   ", LARGE_FONT);
+	OLED_Shownum3(56, 4, Yaw, LARGE_FONT); // 显示航向角
 }
 
 /**
@@ -170,12 +170,15 @@ int OLED_ShowDigit(unsigned int x, unsigned int y, unsigned int digit, unsigned 
 	}
 	return 0;
 }
-//--------------------------------------------------------------
-// Prototype      : void OLED_ShowChar(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize)
-// Calls          :
-// Parameters     : x,y -- 起始点坐标(x:0~127, y:0~7); ch[] -- 要显示的字符串; TextSize -- 字符大小(1:6*8 ; 2:8*16)
-// Description    : 显示codetab.h中的ASCII字符,有6*8和8*16可选择
-//--------------------------------------------------------------
+
+/**
+ * @brief 显示codetab.h中的ASCII字符,有SMALL_FONT(6*8) 和 LARGE_FONT (8*16) 可供选择
+ *
+ * @param x 显示首字符的 x 列位置 (x: 0~126, 或 0~120)
+ * @param y 显示首字符的 y 行位置 (y: 0~7)
+ * @param ch 显示的字符串
+ * @param TextSize 字号, SMALL_FONT:小号, LARGE_FONT:大号
+ */
 void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize)
 {
 	unsigned char c = 0, i = 0, j = 0;
