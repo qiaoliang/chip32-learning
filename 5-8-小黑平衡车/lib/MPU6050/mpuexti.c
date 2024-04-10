@@ -9,7 +9,7 @@
 #include "motor.h"
 #include "timer.h"
 
-extern float zhongzhi;	// roll理论值（小车平衡时的角度）
+extern float balance_angle; // pitch理论值（小车平衡时的角度）
 extern int motor_flag;	// 电机使能标志
 float pitch, roll, yaw; // 欧拉角
 float measure, calcu;	// 测量值和理论值
@@ -48,14 +48,16 @@ void EXTI15_10_IRQHandler(void)
 {
 	if (mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
 	{
-		measure = roll;	  // roll测量值
-		calcu = zhongzhi; // roll理论值
+		// measure 测量值的取值与 MPU6050 的安装方向有关.
+		// 如果在实测中,轮子转动不敏感,可以选择roll 试一下. 注意, Main函数中motor_flag 的判断也需要一并修正,以保持一致.
+		measure = pitch;
+		calcu = balance_angle; // 理论值
 
-		velocity = (read_encoder2() + read_encoder3()) / 2; // 速度测量值
+		velocity = (read_encoder2() + read_encoder3()) / 2; // 两个轮子的速度取平均值
 
-		// PID计算：直立环+速度环（完整版本还要加转向环，转向环怎么写怎么调，请看群公告）
-		PWM = vertical_PID_value(measure, calcu) + velocity_PID_value(velocity);
-		PWM_Xianfu(7000, &PWM); // PWM限幅
+		// PID计算：直立环+速度环
+		PWM = vertical_PID_value(measure, calcu)+ velocity_PID_value(velocity);
+		PWM_Limiting(7000, &PWM); // PWM限幅
 
 		if (motor_flag)
 			SETPWM(PWM); // 给电机PWM

@@ -18,7 +18,7 @@ void OLED_ShowCN(unsigned char x, unsigned char y, unsigned char N);            
 void OLED_Clear(void);                                                                           // 清屏
 
 // 显示角度
-void OLED_ShowAngle(float pitch, float yaw);
+void OLED_ShowAngle(float pitch, float roll, float yaw);
 void OLED_ShowPWM(int PWM);
 void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned char TextSize);
 

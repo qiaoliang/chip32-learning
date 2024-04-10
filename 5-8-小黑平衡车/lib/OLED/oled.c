@@ -9,12 +9,12 @@ void OLED_ShowPWM(int PWM)
 {
 	if (PWM < 0)
 	{
-		OLED_ShowStr(50, 6, "-", 2); // 显示负号
+		OLED_ShowStr(10, 6, "PWM: -", LARGE_FONT); // 显示负号
 		PWM = -PWM;
 	}
 	else
-		OLED_ShowStr(50, 6, " ", 2); // 掩盖负号
-	OLED_ShowNumber(58, 6, PWM, 2);	 // 显示PWM
+		OLED_ShowStr(10, 6, "PWM: ", LARGE_FONT); // 掩盖负号
+	OLED_ShowNumber(58, 6, PWM, LARGE_FONT);	  // 显示PWM
 }
 
 /**
@@ -23,29 +23,40 @@ void OLED_ShowPWM(int PWM)
  * @param roll  翻滚角
  * @param yaw  显示航向角
  */
-void OLED_ShowAngle(float roll, float yaw)
+void OLED_ShowAngle(float pitch, float roll, float yaw)
 {
-	int Roll, Yaw;
+
+	int Pitch, Roll, Yaw;
+	Pitch = (int)(pitch * 10);
 	Roll = (int)(roll * 10);
 	Yaw = (int)(yaw * 10);
 	// 对浮点数做处理，于是可以显示在lcd上
+
+	if (Pitch < 0)
+	{
+		OLED_ShowStr(0, 0, "Pitch: -", LARGE_FONT); // 显示负号
+		Pitch = -Pitch;
+	}
+	else
+		OLED_ShowStr(0, 0, "Pitch:  ", LARGE_FONT); // 显示正号
+	OLED_Shownum3(64, 0, Pitch, LARGE_FONT);		// 显示 Pitch 俯仰角
 	if (Roll < 0)
 	{
-		OLED_ShowStr(0, 2, "-", 2); // 显示负号
+		OLED_ShowStr(0, 2, "Roll:  -", LARGE_FONT); // 显示负号
 		Roll = -Roll;
 	}
 	else
-		OLED_ShowStr(0, 2, " ", 2);					 // 显示正号
-	OLED_Shownum3( 8, 2, Roll, 2); // 显示翻滚角
+		OLED_ShowStr(0, 2, "Roll:  ", LARGE_FONT); // 显示正号
+	OLED_Shownum3(64, 2, Roll, LARGE_FONT);		   // 显示Roll 翻滚角
 
 	if (Yaw < 0)
 	{
-		OLED_ShowStr(0, 4, "-", 2);
+		OLED_ShowStr(0, 4, "Yaw:   -", LARGE_FONT);
 		Yaw = -Yaw;
 	}
 	else
-		OLED_ShowStr(0, 4, " ", 2);
-	OLED_Shownum3(8, 4, Yaw, 2); // 显示航向角
+		OLED_ShowStr(0, 4, "Yaw:    ", LARGE_FONT);
+	OLED_Shownum3(64, 4, Yaw, LARGE_FONT); // 显示Yaw航向角
 }
 
 /**
@@ -61,9 +72,15 @@ void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned 
 
 	unsigned int ge, shi, bai, qian;
 	ge = num % 10;
-	shi = (num % 100) / 10;
-	bai = (num % 1000) / 100;
-	qian = (num % 10000) / 1000;
+	num = num / 10;
+	shi = num % 10;
+	num = num / 10;
+	bai = num % 10;
+	num = num /10;
+	if(num ==0)
+		qian = 0;
+	else
+	    qian = num % 10;
 	unsigned int font_size, font_width;
 	font_size = (TextSize == SMALL_FONT) ? SMALL_FONT : LARGE_FONT;
 	font_width = (TextSize == SMALL_FONT) ? SMALL_FONT_WIDTH : LARGE_FONT_WIDTH;
@@ -74,9 +91,8 @@ void OLED_Shownum3(unsigned char x, unsigned char y, unsigned int num, unsigned 
 	OLED_ShowStr(x + font_width * 3, y, ".", font_size);
 	OLED_ShowDigit(x + font_width * 4, y, ge, font_size);
 }
-
 /**
- * @brief 使用小字号,在指定位置(x,y) 显示指定的一串小于10位数的数字(正数或负数).如果超过屏幕宽度,则换行.
+ * @brief 使用小字号,在指定位置(x,y) 显示指定的一串小于5位数的数字(正数或负数).如果超过屏幕宽度,则换行.
  *
  * @param x 指定的列
  * @param y 指定的行
@@ -170,12 +186,15 @@ int OLED_ShowDigit(unsigned int x, unsigned int y, unsigned int digit, unsigned 
 	}
 	return 0;
 }
-//--------------------------------------------------------------
-// Prototype      : void OLED_ShowChar(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize)
-// Calls          :
-// Parameters     : x,y -- 起始点坐标(x:0~127, y:0~7); ch[] -- 要显示的字符串; TextSize -- 字符大小(1:6*8 ; 2:8*16)
-// Description    : 显示codetab.h中的ASCII字符,有6*8和8*16可选择
-//--------------------------------------------------------------
+
+/**
+ * @brief 显示codetab.h中的ASCII字符,有SMALL_FONT(6*8) 和 LARGE_FONT (8*16) 可供选择
+ *
+ * @param x 显示首字符的 x 列位置 (x: 0~126, 或 0~120)
+ * @param y 显示首字符的 y 行位置 (y: 0~7)
+ * @param ch 显示的字符串
+ * @param TextSize 字号, SMALL_FONT:小号, LARGE_FONT:大号
+ */
 void OLED_ShowStr(unsigned char x, unsigned char y, unsigned char ch[], unsigned char TextSize)
 {
 	unsigned char c = 0, i = 0, j = 0;

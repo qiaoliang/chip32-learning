@@ -21,8 +21,7 @@ void SETPWM(int PWM)
 	}
 }
 
-
-void PWM_Xianfu(int max,int *PWM)
+void PWM_Limiting(int max, int *PWM)
 {
 	if(*PWM>max)  *PWM = max;
 	if(*PWM<-max) *PWM =-max;
@@ -105,7 +104,7 @@ int read_encoder3(void)
 	return speed;
 }
 /**
- * @brief 使用定时器2读取编码器的速度
+ * @brief 读取编码器的速度(使用定时器2)
  *
  * @return int 速度值
  */
