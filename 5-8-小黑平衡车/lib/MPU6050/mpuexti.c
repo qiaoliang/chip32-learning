@@ -49,14 +49,14 @@ void EXTI15_10_IRQHandler(void)
 	if (mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
 	{
 		// measure 测量值的取值与 MPU6050 的安装方向有关.
-		// 如果在实测中,轮子转动不敏感,可以选择roll 或 yaw 试一下.
+		// 如果在实测中,轮子转动不敏感,可以选择roll 试一下. 注意, Main函数中motor_flag 的判断也需要一并修正,以保持一致.
 		measure = pitch;
 		calcu = balance_angle; // 理论值
 
 		velocity = (read_encoder2() + read_encoder3()) / 2; // 速度测量值
 
 		// PID计算：直立环+速度环
-		PWM = vertical_PID_value(measure, calcu) + velocity_PID_value(velocity);
+		PWM = vertical_PID_value(measure, calcu)+ velocity_PID_value(velocity);
 		PWM_Limiting(7000, &PWM); // PWM限幅
 
 		if (motor_flag)

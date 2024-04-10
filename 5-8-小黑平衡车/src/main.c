@@ -15,13 +15,18 @@ extern float velocity_sum;	   // 速度积分
 int motor_flag;				   // 电机使能标志：1使能  0失能
 
 // 直立环PD参数:
-float Kp = -420, Ki = 0, Kd = -2000; // 调完速度环后精调
-// float Kp=-420,Ki=0,Kd=-960; //乘0.6
-// float Kp=-700,Ki=0,Kd=-1600;
-// float Kp=0,Ki=0,Kd=0;
+// float Kp = -420, Ki = 0, Kd = -2000; // 调完速度环后精调
+//float Kp=-720,Ki=0,Kd=-1320; //上一步的数值乘0.6以后
+// 6. float Kp = -1200, Ki = 0, Kd = -2200;  //OK, 需要
+// 5. float Kp = -1000, Ki = 0, Kd =-1600 ;
+// 4. float Kp = -1000, Ki = 0, Kd =-1000 ;
+//float Kp = -600, Ki = 0, Kd = -2240; // 更大幅度的振动 * 0.6
+//float Kp=-1300,Ki=0,Kd=-3800;//更大幅度的振动
+float Kp = -400,Ki =0,Kd=0;//大幅度振动
+// 1. float Kp=0,Ki=0,Kd=0;
 
 // 速度环PI参数:
-float VKp = +190, VKi = 0.95;
+float VKp = +100, VKi = 0.5;
 
 int main()
 {
@@ -40,7 +45,7 @@ int main()
 	while (1)
 	{
 		// 【1】安全装置：
-		if (roll < -30 || roll > 30) // 小车可能已经倒了
+		if (pitch < -30 || pitch > 30) // 小车可能已经倒了
 		{
 			motor_flag = 0;			 // 关闭电机
 			velocity_sum = 0;		 // 速度积分清0
