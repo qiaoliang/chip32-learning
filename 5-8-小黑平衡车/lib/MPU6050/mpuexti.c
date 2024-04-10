@@ -9,7 +9,7 @@
 #include "motor.h"
 #include "timer.h"
 
-extern float balance_angle; // roll理论值（小车平衡时的角度）
+extern float balance_angle; // pitch理论值（小车平衡时的角度）
 extern int motor_flag;	// 电机使能标志
 float pitch, roll, yaw; // 欧拉角
 float measure, calcu;	// 测量值和理论值
@@ -53,7 +53,7 @@ void EXTI15_10_IRQHandler(void)
 		measure = pitch;
 		calcu = balance_angle; // 理论值
 
-		velocity = (read_encoder2() + read_encoder3()) / 2; // 速度测量值
+		velocity = (read_encoder2() + read_encoder3()) / 2; // 两个轮子的速度取平均值
 
 		// PID计算：直立环+速度环
 		PWM = vertical_PID_value(measure, calcu)+ velocity_PID_value(velocity);

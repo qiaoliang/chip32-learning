@@ -9,24 +9,21 @@
 #include "motor.h"
 
 extern float pitch, roll, yaw; // 欧拉角测量值
-float balance_angle = 0;			   // 小车平衡时的角度
+float balance_angle = -1.3;			   // 小车平衡时的角度
 extern int velocity;		   // 速度测量值（编码器脉冲数，非真实速度）
 extern float velocity_sum;	   // 速度积分
 int motor_flag;				   // 电机使能标志：1使能  0失能
 
 // 直立环PD参数:
 // float Kp = -420, Ki = 0, Kd = -2000; // 调完速度环后精调
-//float Kp=-720,Ki=0,Kd=-1320; //上一步的数值乘0.6以后
-// 6. float Kp = -1200, Ki = 0, Kd = -2200;  //OK, 需要
-// 5. float Kp = -1000, Ki = 0, Kd =-1600 ;
-// 4. float Kp = -1000, Ki = 0, Kd =-1000 ;
-//float Kp = -600, Ki = 0, Kd = -2240; // 更大幅度的振动 * 0.6
-//float Kp=-1300,Ki=0,Kd=-3800;//更大幅度的振动
-float Kp = -400,Ki =0,Kd=0;//大幅度振动
-// 1. float Kp=0,Ki=0,Kd=0;
+
+float Kp = -800, Ki = 0, Kd = -2100; // 第三步, 同时将Kp 和 Kd 数值乘0.6 , 开始调整速度环. -1300 * 0.6 = -780, -3500 * 0.6 = -2100
+// float Kp = -1600,Ki =0,Kd=-3500; // 第二步, 调整Kd 值, 改善振幅, 让小车变成小幅度高频摇摆振动
+// float Kp = -1500,Ki =0,Kd=0;//第一步, 调整Kp, 小车大幅度摇摆振动
+
 
 // 速度环PI参数:
-float VKp = +100, VKi = 0.5;
+float VKp = +280, VKi = 1.4;  // 第三步, 同时将Kp 和 Kd 数值乘0.6 , 开始调整速度环.  VKp 与 Vki之间是200的倍数关系.
 
 int main()
 {
