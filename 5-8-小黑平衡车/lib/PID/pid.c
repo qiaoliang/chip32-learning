@@ -1,3 +1,13 @@
+/**
+ * @file pid.c
+ * @author Master Qiao
+ * @brief PID算法的解释可以参见 https://zhuanlan.zhihu.com/p/39573490
+ * @version 0.1
+ * @date 2024-04-12
+ *
+ * @copyright Copyright (c) 2024
+Qiao
+ */
 #include "pid.h"
 
 extern float Kp, Ki, Kd; // 直立环参数
@@ -12,10 +22,10 @@ float last_filt_velocity; // 上一次的滤波后的速度
 float velocity_sum = 0;	  // 速度的累加
 
 // 直立环：
-int vertical_PID_value(float measure, float calcu)
+int vertical_PID_value(float measurement, float targetPoint)
 {
 
-	err = measure - calcu;			 // 误差
+	err = measurement - targetPoint;			 // 误差
 	err_sum += err;					 // 误差的累加
 	err_difference = err - last_err; // 误差的差值
 	last_err = err;					 // 此次误差记录为“上次误差”
