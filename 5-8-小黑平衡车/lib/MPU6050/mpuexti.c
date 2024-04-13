@@ -9,7 +9,7 @@
 #include "motor.h"
 #include "timer.h"
 
-extern float balance_angle; // pitch理论值（小车平衡时的角度）
+extern float balance_angle; // pitch 理论值（小车平衡时的目标角度）
 extern int motor_flag;	// 电机使能标志
 float pitch, roll, yaw; // 欧拉角
 float measurement, targetPoint;	// 测量值和理论值
